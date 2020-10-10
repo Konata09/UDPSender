@@ -1,0 +1,2 @@
+include ':udpsender'
+rootProject.name = "UDP Sender"
