@@ -112,11 +112,11 @@ public class DeviceFragment extends Fragment {
                         newDeviceName = deviceName.getText().toString();
                         newDeviceIp = deviceIp.getText().toString();
                         newDeviceMac = deviceMac.getText().toString();
-                        boolean isIpValid = deviceIp.getError() == null;
-                        boolean isMacValid = deviceMac.getError() == null;
+                        boolean isIpValid = ipInput.getError() == null;
+                        boolean isMacValid = macInput.getError() == null;
 
 
-                        if (isIpValid && isMacValid && !newDeviceName.isEmpty() && (!newDeviceIp.isEmpty() | !newDeviceMac.isEmpty())) {
+                        if (!newDeviceName.isEmpty() && ((!newDeviceIp.isEmpty()) && isIpValid) || (!newDeviceMac.isEmpty() && isMacValid)) {
                             Snackbar.make(v, newDeviceName + " Added", Snackbar.LENGTH_LONG).show();
                             dialog.dismiss();
                         } else {

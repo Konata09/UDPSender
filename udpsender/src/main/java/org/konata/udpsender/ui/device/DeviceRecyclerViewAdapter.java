@@ -138,14 +138,14 @@ public class DeviceRecyclerViewAdapter extends RecyclerView.Adapter<DeviceRecycl
                                     newDeviceName = deviceName.getText().toString();
                                     newDeviceIp = deviceIp.getText().toString();
                                     newDeviceMac = deviceMac.getText().toString();
-                                    boolean isIpValid = deviceIp.getError() == null;
-                                    boolean isMacValid = deviceMac.getError() == null;
-                                    if (isIpValid && isMacValid && !newDeviceName.isEmpty() && (!newDeviceIp.isEmpty() | !newDeviceMac.isEmpty())) {
+                                    boolean isIpValid = ipInput.getError() == null;
+                                    boolean isMacValid = macInput.getError() == null;
+                                    if (!newDeviceName.isEmpty() && ((!newDeviceIp.isEmpty()) && isIpValid) || (!newDeviceMac.isEmpty() && isMacValid)) {
                                         Snackbar.make(view, newDeviceName + " Edited Position:" + position, Snackbar.LENGTH_LONG).show();
                                         dialog.dismiss();
                                     } else {
                                         Toast toast = Toast.makeText(view.getContext(), "Please check your input", Toast.LENGTH_SHORT);
-                                        toast.setGravity(Gravity.CENTER,0,0);
+                                        toast.setGravity(Gravity.CENTER, 0, 0);
                                         toast.show();
                                     }
                                 }
