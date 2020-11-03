@@ -1,17 +1,14 @@
 package org.konata.udpsender.ui.command;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -24,14 +21,16 @@ import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 
+import org.konata.udpsender.AppDatabase;
 import org.konata.udpsender.R;
+import org.konata.udpsender.entity.Command;
 
 import java.util.List;
 import java.util.regex.Pattern;
 
 public class CommandRecyclerViewAdapter extends RecyclerView.Adapter<CommandRecyclerViewAdapter.MyViewHolder> {
     View myView;
-    private List myItems;
+    private List<Command> commands;
 
     @NonNull
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -54,8 +53,8 @@ public class CommandRecyclerViewAdapter extends RecyclerView.Adapter<CommandRecy
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public CommandRecyclerViewAdapter(List commands) {
-        myItems = commands;
+    public CommandRecyclerViewAdapter(List<Command> commands) {
+        this.commands = commands;
     }
 
     @Override
@@ -67,7 +66,9 @@ public class CommandRecyclerViewAdapter extends RecyclerView.Adapter<CommandRecy
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(final MyViewHolder holder, final int position) {
-        final String name = (String) myItems.get(position);
+        final String name = commands.get(position).commandName;
+        final String value = commands.get(position).commandValue;
+        final int cid = commands.get(position).cid;
         holder.title.setText(name);
         holder.button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,7 +100,7 @@ public class CommandRecyclerViewAdapter extends RecyclerView.Adapter<CommandRecy
                             final EditText commandName = (EditText) viewInflated.findViewById(R.id.commandaddname);
                             final EditText commandValue = (EditText) viewInflated.findViewById(R.id.commandaddvalue);
                             commandName.setText(name);
-                            commandValue.setText("FFFF");
+                            commandValue.setText(value);
                             final TextInputLayout valueInput = (TextInputLayout) viewInflated.findViewById(R.id.commandaddvalueinput);
                             builder.setView(viewInflated);
 
@@ -128,8 +129,10 @@ public class CommandRecyclerViewAdapter extends RecyclerView.Adapter<CommandRecy
                                     newCommandValue = commandValue.getText().toString();
                                     boolean isValueValid = valueInput.getError() == null;
                                     if (isValueValid && !newCommandName.isEmpty() && !newCommandValue.isEmpty()) {
-                                        Snackbar.make(view, newCommandName + " Edited Position:" + position, Snackbar.LENGTH_LONG).show();
+                                        Command command = new Command(cid, newCommandName, newCommandValue);
+                                        AppDatabase.getDatabase(view.getContext()).commandDao().updateCommand(command);
                                         dialog.dismiss();
+                                        Snackbar.make(view, newCommandName + " Edited Position:" + position, Snackbar.LENGTH_LONG).show();
                                     } else {
                                         Toast toast = Toast.makeText(view.getContext(), "Please check your input", Toast.LENGTH_SHORT);
                                         toast.setGravity(Gravity.CENTER,0,0);
@@ -183,6 +186,6 @@ public class CommandRecyclerViewAdapter extends RecyclerView.Adapter<CommandRecy
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        return myItems.size();
+        return commands.size();
     }
 }

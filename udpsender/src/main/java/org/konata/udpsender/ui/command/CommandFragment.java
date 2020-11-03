@@ -21,9 +21,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 
+import org.konata.udpsender.AppDatabase;
 import org.konata.udpsender.R;
+import org.konata.udpsender.entity.Command;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -38,32 +39,8 @@ public class CommandFragment extends Fragment {
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
-        List commands = new ArrayList();
-        commands.add("命令1");
-        commands.add("命令2");
-        commands.add("命令3");
-        commands.add("命令4");
-        commands.add("命令5");
-        commands.add("命令5");
-        commands.add("命令5");
-        commands.add("命令5");
-        commands.add("命令5");
-        commands.add("shutdown");
-        commands.add("命令5");
-        commands.add("命令5");
-        commands.add("命令5");
-        commands.add("命令5");
-        commands.add("命令5");
-        commands.add("命令5");
-        commands.add("命令5");
-        commands.add("命令5");
-        commands.add("命令5");
-        commands.add("命令5");
-        commands.add("命令5");
-        commands.add("命令5");
-        commands.add("命令5");
-        commands.add("命令5");
-        commands.add("Last");
+        List<Command> commands = AppDatabase.getDatabase(getContext()).commandDao().getCommands();
+
         mAdapter = new CommandRecyclerViewAdapter(commands);
         recyclerView.setAdapter(mAdapter);
 
@@ -108,11 +85,13 @@ public class CommandFragment extends Fragment {
                         newCommandValue = commandValue.getText().toString();
                         boolean isValueValid = valueInput.getError() == null;
                         if (isValueValid && !newCommandName.isEmpty() && !newCommandValue.isEmpty()) {
-                            Snackbar.make(view, newCommandName + " Added", Snackbar.LENGTH_LONG).show();
+                            Command command = new Command(newCommandName, newCommandValue);
+                            AppDatabase.getDatabase(getContext()).commandDao().insertCommand(command);
                             dialog.dismiss();
+                            Snackbar.make(view, newCommandName + " Added", Snackbar.LENGTH_LONG).show();
                         } else {
                             Toast toast = Toast.makeText(view.getContext(), "Please check your input", Toast.LENGTH_SHORT);
-                            toast.setGravity(Gravity.CENTER,0,0);
+                            toast.setGravity(Gravity.CENTER, 0, 0);
                             toast.show();
                         }
                     }
@@ -128,7 +107,7 @@ public class CommandFragment extends Fragment {
 
                     @Override
                     public void afterTextChanged(Editable s) {
-                        Pattern hexPattern = Pattern.compile("(^[A-F0-9]+$|^$)");
+                        Pattern hexPattern = Pattern.compile("(^[A-Fa-f0-9]+$|^$)");
                         if (!hexPattern.matcher(s.toString()).matches()) {
                             valueInput.setError("Hexadecimal Required");
                         } else {
