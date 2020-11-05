@@ -1,10 +1,12 @@
 package org.konata.udpsender.ui.command;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +16,10 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -39,8 +45,7 @@ public class CommandFragment extends Fragment {
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
-        List<Command> commands = AppDatabase.getDatabase(getContext()).commandDao().getCommands();
-
+        final List<Command> commands = AppDatabase.getDatabase(getContext()).commandDao().getCommands();
         mAdapter = new CommandRecyclerViewAdapter(commands);
         recyclerView.setAdapter(mAdapter);
 
@@ -89,6 +94,9 @@ public class CommandFragment extends Fragment {
                             AppDatabase.getDatabase(getContext()).commandDao().insertCommand(command);
                             dialog.dismiss();
                             Snackbar.make(view, newCommandName + " Added", Snackbar.LENGTH_LONG).show();
+                            commands.clear();
+                            commands.addAll(AppDatabase.getDatabase(getContext()).commandDao().getCommands());
+                            mAdapter.notifyDataSetChanged();
                         } else {
                             Toast toast = Toast.makeText(view.getContext(), "Please check your input", Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.CENTER, 0, 0);

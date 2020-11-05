@@ -31,7 +31,7 @@ public class UDPPacketFragment extends Fragment {
         recyclerView.setHasFixedSize(true);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 4);
         recyclerView.setLayoutManager(gridLayoutManager);
-        String[] devices = {"1111", "dev22", "dev333", "西楼大厅", "西楼保密室", "西办公楼保密室2", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555"};
+        String[] devices = {"1111", "dev22", "dev333", "西楼大厅", "西楼保密室", "西办公楼保密室2", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555","asd","asddd"};
         mAdapter = new HomeDeviceRecyclerViewAdapter(devices);
         recyclerView.setAdapter(mAdapter);
 

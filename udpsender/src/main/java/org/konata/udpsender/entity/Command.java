@@ -24,4 +24,11 @@ public class Command {
         this.commandName = commandName;
         this.commandValue = commandValue;
     }
+
+    @Ignore
+    public Command(int cid) {
+        this.cid = cid;
+    }
+
+
 }

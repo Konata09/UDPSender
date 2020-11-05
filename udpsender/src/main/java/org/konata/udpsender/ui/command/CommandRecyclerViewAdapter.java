@@ -24,6 +24,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import org.konata.udpsender.AppDatabase;
 import org.konata.udpsender.R;
 import org.konata.udpsender.entity.Command;
+import org.konata.udpsender.ui.device.DeviceRecyclerViewAdapter;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -63,6 +64,12 @@ public class CommandRecyclerViewAdapter extends RecyclerView.Adapter<CommandRecy
         myView = recyclerView;
     }
 
+    void refreshData() {
+        commands.clear();
+        commands.addAll(AppDatabase.getDatabase(myView.getContext()).commandDao().getCommands());
+        notifyDataSetChanged();
+    }
+
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(final MyViewHolder holder, final int position) {
@@ -73,37 +80,25 @@ public class CommandRecyclerViewAdapter extends RecyclerView.Adapter<CommandRecy
         holder.button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
-                //creating a popup menu
                 PopupMenu popup = new PopupMenu(view.getContext(), holder.button);
-                //inflating menu from xml resource
                 popup.inflate(R.menu.commandoptionmenu);
-                //adding click listener
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
-                    public boolean onMenuItemClick(MenuItem item) {
+                    public boolean onMenuItemClick(MenuItem item) { // item：用户点击的菜单项
                         int itemId = item.getItemId();
                         if (itemId == R.id.commandoptionedit) {
-
                             final AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
-
-                            System.out.println("view:");
-                            System.out.println(view); // androidx.appcompat.widget.AppCompatTextView{dd04441 VFED..C.. ........ 970,27-1080,106 #7f080074 app:id/commandlistoptionbtn}
-                            System.out.println("myView:");
-                            System.out.println(myView); // androidx.recyclerview.widget.RecyclerView{39a59bc VFED..... .F...... 0,0-1080,1704 #7f080075 app:id/commandlistview}
-                            System.out.println("view.getContext:");
-                            System.out.println(view.getContext()); // org.konata.udpsender.MainActivity@d40d71b
-
+                            final EditText commandValue;
+                            final EditText commandName;
+                            final TextInputLayout valueInput;
                             builder.setTitle("Edit Command");
-                            // I'm using fragment here so I'm using getView() to provide ViewGroup
-                            // but you can provide here any other instance of ViewGroup from your Fragment / Activity
                             View viewInflated = LayoutInflater.from(view.getContext()).inflate(R.layout.command_add_dialog, (ViewGroup) myView, false);
-                            final EditText commandName = (EditText) viewInflated.findViewById(R.id.commandaddname);
-                            final EditText commandValue = (EditText) viewInflated.findViewById(R.id.commandaddvalue);
+                            commandName = (EditText) viewInflated.findViewById(R.id.commandaddname);
+                            commandValue = (EditText) viewInflated.findViewById(R.id.commandaddvalue);
                             commandName.setText(name);
                             commandValue.setText(value);
-                            final TextInputLayout valueInput = (TextInputLayout) viewInflated.findViewById(R.id.commandaddvalueinput);
+                            valueInput = (TextInputLayout) viewInflated.findViewById(R.id.commandaddvalueinput);
                             builder.setView(viewInflated);
-
                             builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
@@ -123,8 +118,8 @@ public class CommandRecyclerViewAdapter extends RecyclerView.Adapter<CommandRecy
                             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    String newCommandName = "";
-                                    String newCommandValue = "";
+                                    String newCommandName;
+                                    String newCommandValue;
                                     newCommandName = commandName.getText().toString();
                                     newCommandValue = commandValue.getText().toString();
                                     boolean isValueValid = valueInput.getError() == null;
@@ -133,13 +128,15 @@ public class CommandRecyclerViewAdapter extends RecyclerView.Adapter<CommandRecy
                                         AppDatabase.getDatabase(view.getContext()).commandDao().updateCommand(command);
                                         dialog.dismiss();
                                         Snackbar.make(view, newCommandName + " Edited Position:" + position, Snackbar.LENGTH_LONG).show();
+                                        refreshData();
                                     } else {
                                         Toast toast = Toast.makeText(view.getContext(), "Please check your input", Toast.LENGTH_SHORT);
-                                        toast.setGravity(Gravity.CENTER,0,0);
+                                        toast.setGravity(Gravity.CENTER, 0, 0);
                                         toast.show();
                                     }
                                 }
                             });
+                            // 输入检测
                             commandValue.addTextChangedListener(new TextWatcher() {
                                 @Override
                                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -161,31 +158,27 @@ public class CommandRecyclerViewAdapter extends RecyclerView.Adapter<CommandRecy
                             });
                             return true;
                         } else if (itemId == R.id.commandoptiondelete) {
-                            Snackbar.make(view, name + " deleted", BaseTransientBottomBar.LENGTH_LONG).setAction("UNDO", new CommandItemDeleteUndoListener()).show();
+                            AppDatabase.getDatabase(view.getContext()).commandDao().deleteCommand(new Command(cid));
+                            Snackbar.make(view, name + " deleted", BaseTransientBottomBar.LENGTH_LONG).show();
+                            refreshData();
                             return true;
                         } else {
                             return false;
                         }
                     }
                 });
-                //displaying the popup
                 popup.show();
             }
         });
     }
 
-    public class CommandItemDeleteUndoListener implements View.OnClickListener {
-
-        @Override
-        public void onClick(View v) {
-            Toast.makeText(v.getContext(), "undo", Toast.LENGTH_SHORT).show();
-            // Code to undo the user's last action
-        }
-    }
-
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        return commands.size();
+        if (commands != null) {
+            return commands.size();
+        } else {
+            return 0;
+        }
     }
 }
