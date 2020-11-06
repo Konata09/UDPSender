@@ -1,6 +1,5 @@
 package org.konata.udpsender.dao;
 
-import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -8,22 +7,22 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
-import org.konata.udpsender.entity.Command;
+import org.konata.udpsender.entity.Device;
 
 import java.util.List;
 
 @Dao
-public interface CommandDao {
+public interface DeviceDao {
 
-    @Query("SELECT * FROM command")
-    List<Command> getCommands();
+    @Query("SELECT * FROM device")
+    List<Device> getDevices();
 
     @Delete
-    void deleteCommand(Command... commands);
+    void deleteDevice(Device... devices);
 
     @Update
-    void updateCommand(Command... commands);
+    void updateDevice(Device... devices);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insertCommand(Command... commands);
+    void insertDevice(Device... devices);
 }

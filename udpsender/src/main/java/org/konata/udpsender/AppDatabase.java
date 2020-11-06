@@ -7,13 +7,16 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
 import org.konata.udpsender.dao.CommandDao;
+import org.konata.udpsender.dao.DeviceDao;
 import org.konata.udpsender.entity.Command;
+import org.konata.udpsender.entity.Device;
 
-@Database(entities = {Command.class}, version = 1)
+@Database(entities = {Command.class, Device.class}, version = 1)
 public abstract class AppDatabase extends RoomDatabase {
     private static final String DATABASE_NAME = "myDatabase";
 
     public abstract CommandDao commandDao();
+    public abstract DeviceDao deviceDao();
 
     private static AppDatabase INSTANCE;
 
