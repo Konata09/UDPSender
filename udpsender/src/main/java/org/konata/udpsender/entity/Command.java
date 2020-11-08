@@ -11,12 +11,12 @@ public class Command {
 
     public String commandName;
     public String commandValue;
-    public int defaultPort;
+    public int port;
 
     public Command(String commandName, String commandValue, int port) {
         this.commandName = commandName;
         this.commandValue = commandValue;
-        this.defaultPort = port;
+        this.port = port;
     }
 
     @Ignore
@@ -24,7 +24,7 @@ public class Command {
         this.cid = cid;
         this.commandName = commandName;
         this.commandValue = commandValue;
-        this.defaultPort = port;
+        this.port = port;
     }
 
     @Ignore

@@ -46,7 +46,7 @@
                         android:textStyle="bold" />
 
                     <RadioButton
-                        android:id="@+id/radioButton2"
+                        android:id="@+id/usepreset"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
@@ -56,15 +56,15 @@
                         android:text="Preset" />
 
                     <Spinner
+                        android:id="@+id/presetspinner"
                         style="spinner"
-                        android:id="@+id/spinner"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="32dp"
                         android:layout_marginEnd="32dp" />
 
                     <RadioButton
-                        android:id="@+id/radioButton"
+                        android:id="@+id/usecustom"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
@@ -73,15 +73,50 @@
 
 
                     <EditText
-                        android:id="@+id/editText"
+                        android:id="@+id/customvalue"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="36dp"
                         android:layout_marginEnd="32dp"
                         android:inputType="textMultiLine"
-                        android:text="HEX"
+                        android:hint="012BFFFF"
                         android:textSize="16sp" />
                 </RadioGroup>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/portcard"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/payloadcard">
+
+                <TextView
+                    android:id="@+id/porttextview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:text="Port"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/porttext"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="44dp"
+                    android:layout_marginEnd="40dp"
+                    android:layout_marginTop="28dp"
+                    android:inputType="numberDecimal"
+                    android:hint="1-65535"
+                    android:textSize="16sp" />
+
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
@@ -95,7 +130,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/payloadcard">
+                app:layout_constraintTop_toBottomOf="@+id/portcard">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"

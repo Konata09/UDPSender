@@ -57,19 +57,24 @@ public class CommandFragment extends Fragment {
         fab.setOnClickListener(new View.OnClickListener() {
             private String newCommandName = "";
             private String newCommandValue = "";
+            private String newCommandPort = "";
 
             @Override
             public void onClick(final View view) {
                 final EditText commandName;
                 final EditText commandValue;
+                final EditText commandPort;
                 final TextInputLayout valueInput;
+                final TextInputLayout portInput;
                 final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                 builder.setTitle("Add New Command");
 
                 View viewInflated = LayoutInflater.from(getContext()).inflate(R.layout.command_add_dialog, (ViewGroup) getView(), false);
                 commandName = (EditText) viewInflated.findViewById(R.id.commandaddname);
                 commandValue = (EditText) viewInflated.findViewById(R.id.commandaddvalue);
+                commandPort = (EditText) viewInflated.findViewById(R.id.commandaddport);
                 valueInput = (TextInputLayout) viewInflated.findViewById(R.id.commandaddvalueinput);
+                portInput = (TextInputLayout) viewInflated.findViewById(R.id.commandaddportinput);
                 builder.setView(viewInflated);
 
                 builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -91,10 +96,12 @@ public class CommandFragment extends Fragment {
                     public void onClick(View v) {
                         newCommandName = commandName.getText().toString();
                         newCommandValue = commandValue.getText().toString();
+                        newCommandPort = commandPort.getText().toString();
                         boolean isValueValid = valueInput.getError() == null;
+                        boolean isPortVaild = portInput.getError() == null;
 
-                        if (isValueValid && !newCommandName.isEmpty() && !newCommandValue.isEmpty()) {
-                            Command command = new Command(newCommandName, newCommandValue);
+                        if (isValueValid && isPortVaild && !newCommandName.isEmpty() && !newCommandValue.isEmpty() && !newCommandPort.isEmpty()) {
+                            Command command = new Command(newCommandName, newCommandValue, Integer.parseInt(newCommandPort));
                             dialog.dismiss();
                             AppDatabase.getDatabase(getContext()).commandDao().insertCommand(command);
                             Snackbar.make(v, newCommandName + " Added", Snackbar.LENGTH_LONG).show();
@@ -124,6 +131,34 @@ public class CommandFragment extends Fragment {
                             valueInput.setError("Hexadecimal Required");
                         } else {
                             valueInput.setError(null);
+                        }
+                    }
+                });
+
+                commandPort.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        int i;
+                        Pattern numPattern = Pattern.compile("^\\d*$");
+                        if (!numPattern.matcher(s.toString()).matches()) {
+                            portInput.setError("Port must between 1 and 65535");
+                        } else {
+                            i = Integer.parseInt(s.toString());
+                            if (i >= 1 && i <= 65535) {
+                                portInput.setError(null);
+                            } else {
+                                portInput.setError("Port must between 1 and 65535");
+                            }
                         }
                     }
                 });

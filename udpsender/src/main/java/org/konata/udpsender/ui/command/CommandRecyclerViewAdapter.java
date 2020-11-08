@@ -69,6 +69,7 @@ public class CommandRecyclerViewAdapter extends RecyclerView.Adapter<CommandRecy
     public void onBindViewHolder(final MyViewHolder holder, final int position) {
         final String name = commands.get(position).commandName;
         final String value = commands.get(position).commandValue;
+        final int port = commands.get(position).port;
         final int cid = commands.get(position).cid;
         holder.commandName.setText(name);
         holder.popupBtn.setOnClickListener(new View.OnClickListener() {
@@ -84,14 +85,19 @@ public class CommandRecyclerViewAdapter extends RecyclerView.Adapter<CommandRecy
                             final AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
                             final EditText commandValue;
                             final EditText commandName;
+                            final EditText commandPort;
                             final TextInputLayout valueInput;
+                            final TextInputLayout portInput;
                             builder.setTitle("Edit Command");
                             View viewInflated = LayoutInflater.from(view.getContext()).inflate(R.layout.command_add_dialog, (ViewGroup) myView, false);
                             valueInput = (TextInputLayout) viewInflated.findViewById(R.id.commandaddvalueinput);
+                            portInput = (TextInputLayout) viewInflated.findViewById(R.id.commandaddportinput);
                             commandName = (EditText) viewInflated.findViewById(R.id.commandaddname);
                             commandValue = (EditText) viewInflated.findViewById(R.id.commandaddvalue);
+                            commandPort = (EditText) viewInflated.findViewById(R.id.commandaddport);
                             commandName.setText(name);
                             commandValue.setText(value);
+                            commandPort.setText(String.valueOf(port));
                             builder.setView(viewInflated);
                             builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                                 @Override
@@ -114,11 +120,14 @@ public class CommandRecyclerViewAdapter extends RecyclerView.Adapter<CommandRecy
                                 public void onClick(View v) {
                                     String newCommandName;
                                     String newCommandValue;
+                                    String newCommandPort;
                                     newCommandName = commandName.getText().toString();
                                     newCommandValue = commandValue.getText().toString();
+                                    newCommandPort = commandPort.getText().toString();
                                     boolean isValueValid = valueInput.getError() == null;
-                                    if (isValueValid && !newCommandName.isEmpty() && !newCommandValue.isEmpty()) {
-                                        Command command = new Command(cid, newCommandName, newCommandValue);
+                                    boolean isPortValid = portInput.getError() == null;
+                                    if (isValueValid && isPortValid && !newCommandName.isEmpty() && !newCommandValue.isEmpty() && !newCommandPort.isEmpty()) {
+                                        Command command = new Command(cid, newCommandName, newCommandValue, Integer.parseInt(newCommandPort));
                                         AppDatabase.getDatabase(view.getContext()).commandDao().updateCommand(command);
                                         dialog.dismiss();
                                         Snackbar.make(view, newCommandName + " Edited Position:" + position, Snackbar.LENGTH_LONG).show();
@@ -147,6 +156,34 @@ public class CommandRecyclerViewAdapter extends RecyclerView.Adapter<CommandRecy
                                         valueInput.setError("Hexadecimal Required");
                                     } else {
                                         valueInput.setError(null);
+                                    }
+                                }
+                            });
+
+                            commandPort.addTextChangedListener(new TextWatcher() {
+                                @Override
+                                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                                }
+
+                                @Override
+                                public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                                }
+
+                                @Override
+                                public void afterTextChanged(Editable s) {
+                                    int i;
+                                    Pattern numPattern = Pattern.compile("^\\d*$");
+                                    if (!numPattern.matcher(s.toString()).matches()) {
+                                        portInput.setError("Port must between 1 and 65535");
+                                    } else {
+                                        i = Integer.parseInt(s.toString());
+                                        if (i >= 1 && i <= 65535) {
+                                            portInput.setError(null);
+                                        } else {
+                                            portInput.setError("Port must between 1 and 65535");
+                                        }
                                     }
                                 }
                             });

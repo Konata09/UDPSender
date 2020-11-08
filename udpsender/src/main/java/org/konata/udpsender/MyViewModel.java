@@ -14,7 +14,7 @@ public class MyViewModel extends ViewModel {
     }
 
     public void makeRequest(String s) {
-        repository.makeLoginRequest("172.31.160.138", "FFFFFF", new RepositoryCallback() {
+        repository.makeLoginRequest("172.31.160.138",4001, "FFFFFF", new RepositoryCallback() {
             @Override
             public void onComplete(Result result) {
                 if (result instanceof Result.Success) {
