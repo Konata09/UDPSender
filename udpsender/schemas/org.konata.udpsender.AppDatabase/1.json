@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "7b506868ed2708028cede27a9285b934",
+    "identityHash": "42a7902bd166b4ed14b87683d1fcd8b4",
     "entities": [
       {
         "tableName": "Command",
@@ -35,12 +35,62 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "Device",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`did` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `deviceName` TEXT, `ipAddr` TEXT, `macAddr` TEXT, `enableUDP` INTEGER NOT NULL, `enableWOL` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "did",
+            "columnName": "did",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceName",
+            "columnName": "deviceName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ipAddr",
+            "columnName": "ipAddr",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "macAddr",
+            "columnName": "macAddr",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "enableUDP",
+            "columnName": "enableUDP",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "enableWOL",
+            "columnName": "enableWOL",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "did"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7b506868ed2708028cede27a9285b934')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '42a7902bd166b4ed14b87683d1fcd8b4')"
     ]
   }
 }

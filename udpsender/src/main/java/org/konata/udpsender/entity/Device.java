@@ -8,13 +8,13 @@ import androidx.room.PrimaryKey;
 @Entity
 public class Device {
     @PrimaryKey(autoGenerate = true)
-    private int did;
+    public int did;
 
-    private String deviceName;
-    private String ipAddr;
-    private String macAddr;
-    private boolean enableUDP;
-    private boolean enableWOL;
+    public String deviceName;
+    public String ipAddr;
+    public String macAddr;
+    public boolean enableUDP;
+    public boolean enableWOL;
 
     public Device(String deviceName, String ipAddr, String macAddr, boolean enableUDP, boolean enableWOL) {
         this.deviceName = deviceName;

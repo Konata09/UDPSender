@@ -35,17 +35,20 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class CommandFragment extends Fragment {
+
     private RecyclerView.Adapter mAdapter;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_command, container, false);
+        final List<Command> commands;
 
         // 命令列表
         RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.commandlistview);
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
-        final List<Command> commands = AppDatabase.getDatabase(getContext()).commandDao().getCommands();
+
+        commands = AppDatabase.getDatabase(getContext()).commandDao().getCommands();
         mAdapter = new CommandRecyclerViewAdapter(commands);
         recyclerView.setAdapter(mAdapter);
 
@@ -57,21 +60,22 @@ public class CommandFragment extends Fragment {
 
             @Override
             public void onClick(final View view) {
-
+                final EditText commandName;
+                final EditText commandValue;
+                final TextInputLayout valueInput;
                 final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                 builder.setTitle("Add New Command");
-                // I'm using fragment here so I'm using getView() to provide ViewGroup
-                // but you can provide here any other instance of ViewGroup from your Fragment / Activity
+
                 View viewInflated = LayoutInflater.from(getContext()).inflate(R.layout.command_add_dialog, (ViewGroup) getView(), false);
-                final EditText commandName = (EditText) viewInflated.findViewById(R.id.commandaddname);
-                final EditText commandValue = (EditText) viewInflated.findViewById(R.id.commandaddvalue);
-                final TextInputLayout valueInput = (TextInputLayout) viewInflated.findViewById(R.id.commandaddvalueinput);
+                commandName = (EditText) viewInflated.findViewById(R.id.commandaddname);
+                commandValue = (EditText) viewInflated.findViewById(R.id.commandaddvalue);
+                valueInput = (TextInputLayout) viewInflated.findViewById(R.id.commandaddvalueinput);
                 builder.setView(viewInflated);
 
                 builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
+                        // 为了输入检查不通过时点击按钮对话框不消失，这里先留空
                     }
                 });
                 builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
@@ -82,18 +86,18 @@ public class CommandFragment extends Fragment {
                 });
                 final AlertDialog dialog = builder.create();
                 dialog.show();
-                //Overriding the handler immediately after show is probably a better approach than OnShowListener as described below
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         newCommandName = commandName.getText().toString();
                         newCommandValue = commandValue.getText().toString();
                         boolean isValueValid = valueInput.getError() == null;
+
                         if (isValueValid && !newCommandName.isEmpty() && !newCommandValue.isEmpty()) {
                             Command command = new Command(newCommandName, newCommandValue);
-                            AppDatabase.getDatabase(getContext()).commandDao().insertCommand(command);
                             dialog.dismiss();
-                            Snackbar.make(view, newCommandName + " Added", Snackbar.LENGTH_LONG).show();
+                            AppDatabase.getDatabase(getContext()).commandDao().insertCommand(command);
+                            Snackbar.make(v, newCommandName + " Added", Snackbar.LENGTH_LONG).show();
                             commands.clear();
                             commands.addAll(AppDatabase.getDatabase(getContext()).commandDao().getCommands());
                             mAdapter.notifyDataSetChanged();

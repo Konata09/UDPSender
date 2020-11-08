@@ -24,7 +24,6 @@ import com.google.android.material.textfield.TextInputLayout;
 import org.konata.udpsender.AppDatabase;
 import org.konata.udpsender.R;
 import org.konata.udpsender.entity.Command;
-import org.konata.udpsender.ui.device.DeviceRecyclerViewAdapter;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -39,29 +38,19 @@ public class CommandRecyclerViewAdapter extends RecyclerView.Adapter<CommandRecy
         return new MyViewHolder(itemView);
     }
 
-    // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView title;
-        public TextView button;
+        public TextView commandName;
+        public TextView popupBtn;
 
         public MyViewHolder(View view) {
             super(view);
-            title = (TextView) view.findViewById(R.id.commanditemname);
-            button = (TextView) view.findViewById(R.id.commandlistoptionbtn);
+            commandName = (TextView) view.findViewById(R.id.commanditemname);
+            popupBtn = (TextView) view.findViewById(R.id.commandlistoptionbtn);
         }
     }
 
-    // Provide a suitable constructor (depends on the kind of dataset)
     public CommandRecyclerViewAdapter(List<Command> commands) {
         this.commands = commands;
-    }
-
-    @Override
-    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
-        super.onAttachedToRecyclerView(recyclerView);
-        myView = recyclerView;
     }
 
     void refreshData() {
@@ -70,17 +59,22 @@ public class CommandRecyclerViewAdapter extends RecyclerView.Adapter<CommandRecy
         notifyDataSetChanged();
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        myView = recyclerView;
+    }
+
     @Override
     public void onBindViewHolder(final MyViewHolder holder, final int position) {
         final String name = commands.get(position).commandName;
         final String value = commands.get(position).commandValue;
         final int cid = commands.get(position).cid;
-        holder.title.setText(name);
-        holder.button.setOnClickListener(new View.OnClickListener() {
+        holder.commandName.setText(name);
+        holder.popupBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
-                PopupMenu popup = new PopupMenu(view.getContext(), holder.button);
+                PopupMenu popup = new PopupMenu(view.getContext(), holder.popupBtn);
                 popup.inflate(R.menu.commandoptionmenu);
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
@@ -93,11 +87,11 @@ public class CommandRecyclerViewAdapter extends RecyclerView.Adapter<CommandRecy
                             final TextInputLayout valueInput;
                             builder.setTitle("Edit Command");
                             View viewInflated = LayoutInflater.from(view.getContext()).inflate(R.layout.command_add_dialog, (ViewGroup) myView, false);
+                            valueInput = (TextInputLayout) viewInflated.findViewById(R.id.commandaddvalueinput);
                             commandName = (EditText) viewInflated.findViewById(R.id.commandaddname);
                             commandValue = (EditText) viewInflated.findViewById(R.id.commandaddvalue);
                             commandName.setText(name);
                             commandValue.setText(value);
-                            valueInput = (TextInputLayout) viewInflated.findViewById(R.id.commandaddvalueinput);
                             builder.setView(viewInflated);
                             builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                                 @Override
@@ -175,10 +169,6 @@ public class CommandRecyclerViewAdapter extends RecyclerView.Adapter<CommandRecy
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        if (commands != null) {
-            return commands.size();
-        } else {
-            return 0;
-        }
+        return commands.size();
     }
 }

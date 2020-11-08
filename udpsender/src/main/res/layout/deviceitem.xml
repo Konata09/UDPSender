@@ -28,8 +28,8 @@
         android:paddingStart="16dp"
         android:paddingTop="4dp"
         android:paddingEnd="16dp"
+        android:fontFamily="monospace"
         android:textColor="@color/devicelistsubtext"
-        android:text="192.168.255.254"
         android:textSize="14sp" />
 
     <TextView
@@ -41,8 +41,8 @@
         android:layout_toStartOf="@id/devicelistoptionbtn"
         android:paddingTop="4dp"
         android:paddingEnd="22dp"
+        android:fontFamily="monospace"
         android:textColor="@color/devicelistsubtext"
-        android:text="00:11:22:33:EE:FF"
         android:textSize="14sp" />
 
     <TextView

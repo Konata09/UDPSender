@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -26,8 +26,8 @@
         android:id="@+id/deviceaddipinput"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
         android:layout_width="match_parent"
-
         android:layout_height="wrap_content"
+        android:layout_below="@id/deviceaddnameinput"
         android:paddingBottom="8dp">
 
         <EditText
@@ -44,6 +44,7 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/deviceaddipinput"
         android:paddingBottom="8dp">
 
         <EditText
@@ -54,4 +55,23 @@
             android:inputType="textCapCharacters" />
 
     </com.google.android.material.textfield.TextInputLayout>
-</LinearLayout>
+
+    <CheckBox
+        android:id="@+id/enableudp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/deviceaddmacinput"
+        android:layout_marginEnd="12dp"
+        android:checked="true"
+        android:text="Custom UDP Packet Target" />
+
+    <CheckBox
+        android:id="@+id/enablewol"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/deviceaddmacinput"
+        android:layout_toEndOf="@id/enableudp"
+        android:checked="true"
+        android:text="WoL Target" />
+
+</RelativeLayout>

@@ -11,7 +11,7 @@ import org.konata.udpsender.dao.DeviceDao;
 import org.konata.udpsender.entity.Command;
 import org.konata.udpsender.entity.Device;
 
-@Database(entities = {Command.class, Device.class}, version = 1)
+@Database(entities = {Command.class, Device.class}, version = 2)
 public abstract class AppDatabase extends RoomDatabase {
     private static final String DATABASE_NAME = "myDatabase";
 

@@ -9,6 +9,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -26,7 +27,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 
+import org.konata.udpsender.AppDatabase;
 import org.konata.udpsender.R;
+import org.konata.udpsender.entity.Device;
+import org.konata.udpsender.util.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,40 +42,17 @@ public class DeviceFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_device, container, false);
+        final List<Device> devices;
 
+        // 设备列表
         RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.devicelistview);
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
-        List devices = new ArrayList();
-        devices.add("dev1");
-        devices.add("dev2");
-        devices.add("dev3");
-        devices.add("dev4");
-        devices.add("dev5");
-        devices.add("设备");
-        devices.add("dev2");
-        devices.add("dev3");
-        devices.add("dev4");
-        devices.add("dev5");
-        devices.add("dev1");
-        devices.add("dev2");
-        devices.add("dev3");
-        devices.add("dev4");
-        devices.add("dev5");
-        devices.add("dev1");
-        devices.add("dev2");
-        devices.add("dev3");
-        devices.add("dev4");
-        devices.add("dev5");
-        devices.add("dev1");
-        devices.add("dev2");
-        devices.add("dev3");
-        devices.add("dev4");
-        devices.add("dev5last");
+
+        devices = AppDatabase.getDatabase(getContext()).deviceDao().getDevices();
         mAdapter = new DeviceRecyclerViewAdapter(devices);
         recyclerView.setAdapter(mAdapter);
-
 
         // 增加按钮
         FloatingActionButton fab = v.findViewById(R.id.devicelistfab);
@@ -79,17 +60,29 @@ public class DeviceFragment extends Fragment {
             private String newDeviceName = "";
             private String newDeviceIp = "";
             private String newDeviceMac = "";
+            private boolean newDeviceEnableUDP;
+            private boolean newDeviceEnableWOL;
 
             @Override
-            public void onClick(View v) {
+            public void onClick(final View view) {
+                final EditText deviceName;
+                final EditText deviceIp;
+                final EditText deviceMac;
+                final TextInputLayout ipInput;
+                final TextInputLayout macInput;
+                final CheckBox udpBox;
+                final CheckBox wolBox;
                 final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                 builder.setTitle("Add New Device");
+
                 View viewInflated = LayoutInflater.from(getContext()).inflate(R.layout.device_add_dialog, (ViewGroup) getView(), false);
-                final EditText deviceName = (EditText) viewInflated.findViewById(R.id.deviceaddname);
-                final EditText deviceIp = (EditText) viewInflated.findViewById(R.id.deviceaddip);
-                final EditText deviceMac = (EditText) viewInflated.findViewById(R.id.deviceaddmac);
-                final TextInputLayout ipInput = (TextInputLayout) viewInflated.findViewById(R.id.deviceaddipinput);
-                final TextInputLayout macInput = (TextInputLayout) viewInflated.findViewById(R.id.deviceaddmacinput);
+                deviceName = (EditText) viewInflated.findViewById(R.id.deviceaddname);
+                deviceIp = (EditText) viewInflated.findViewById(R.id.deviceaddip);
+                deviceMac = (EditText) viewInflated.findViewById(R.id.deviceaddmac);
+                ipInput = (TextInputLayout) viewInflated.findViewById(R.id.deviceaddipinput);
+                macInput = (TextInputLayout) viewInflated.findViewById(R.id.deviceaddmacinput);
+                udpBox = (CheckBox) viewInflated.findViewById(R.id.enableudp);
+                wolBox = (CheckBox) viewInflated.findViewById(R.id.enablewol);
                 builder.setView(viewInflated);
 
                 builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -109,16 +102,29 @@ public class DeviceFragment extends Fragment {
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        newDeviceEnableUDP = udpBox.isChecked();
+                        newDeviceEnableWOL = wolBox.isChecked();
                         newDeviceName = deviceName.getText().toString();
                         newDeviceIp = deviceIp.getText().toString();
-                        newDeviceMac = deviceMac.getText().toString();
+                        newDeviceMac = Utils.trimMACtoStor(deviceMac.getText().toString());
                         boolean isIpValid = ipInput.getError() == null;
                         boolean isMacValid = macInput.getError() == null;
 
-
-                        if (!newDeviceName.isEmpty() && ((!newDeviceIp.isEmpty()) && isIpValid) || (!newDeviceMac.isEmpty() && isMacValid)) {
-                            Snackbar.make(v, newDeviceName + " Added", Snackbar.LENGTH_LONG).show();
-                            dialog.dismiss();
+                        // 设备名不为空并且ip和mac至少有一个符合要求
+                        if (!newDeviceName.isEmpty() && ((!newDeviceIp.isEmpty()) && isIpValid && isMacValid) || (!newDeviceMac.isEmpty() && isIpValid && isMacValid)) {
+                            if (newDeviceEnableWOL && newDeviceMac.isEmpty()) { // 网络唤醒必须填写MAC地址
+                                Toast toast = Toast.makeText(view.getContext(), "WoL require MAC address", Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.CENTER, 0, 0);
+                                toast.show();
+                            } else {
+                                Device device = new Device(newDeviceName, newDeviceIp, newDeviceMac, newDeviceEnableUDP, newDeviceEnableWOL);
+                                dialog.dismiss();
+                                AppDatabase.getDatabase(getContext()).deviceDao().insertDevice(device);
+                                Snackbar.make(v, newDeviceName + " Added", Snackbar.LENGTH_LONG).show();
+                                devices.clear();
+                                devices.addAll(AppDatabase.getDatabase(getContext()).deviceDao().getDevices());
+                                mAdapter.notifyDataSetChanged();
+                            }
                         } else {
                             Toast toast = Toast.makeText(getContext(), "Please check your input", Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.CENTER, 0, 0);

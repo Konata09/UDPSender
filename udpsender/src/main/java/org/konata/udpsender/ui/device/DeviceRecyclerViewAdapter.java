@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -21,14 +22,17 @@ import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 
+import org.konata.udpsender.AppDatabase;
 import org.konata.udpsender.R;
+import org.konata.udpsender.entity.Device;
+import org.konata.udpsender.util.Utils;
 
 import java.util.List;
 import java.util.regex.Pattern;
 
 public class DeviceRecyclerViewAdapter extends RecyclerView.Adapter<DeviceRecyclerViewAdapter.MyViewHolder> {
     View myView;
-    private List myItems;
+    private List<Device> devices;
 
     @NonNull
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -36,27 +40,29 @@ public class DeviceRecyclerViewAdapter extends RecyclerView.Adapter<DeviceRecycl
         return new MyViewHolder(itemView);
     }
 
-    // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView deviceName;
         public TextView deviceIp;
         public TextView deviceMac;
-        public TextView button;
+        public TextView popupBtn;
 
         public MyViewHolder(View view) {
             super(view);
             deviceName = (TextView) view.findViewById(R.id.deviceitemname);
             deviceIp = (TextView) view.findViewById(R.id.deviceitemip);
             deviceMac = (TextView) view.findViewById(R.id.deviceitemac);
-            button = (TextView) view.findViewById(R.id.devicelistoptionbtn);
+            popupBtn = (TextView) view.findViewById(R.id.devicelistoptionbtn);
         }
     }
 
-    // Provide a suitable constructor (depends on the kind of dataset)
-    public DeviceRecyclerViewAdapter(List devices) {
-        myItems = devices;
+    public DeviceRecyclerViewAdapter(List<Device> devices) {
+        this.devices = devices;
+    }
+
+    void refreshData() {
+        devices.clear();
+        devices.addAll(AppDatabase.getDatabase(myView.getContext()).deviceDao().getDevices());
+        notifyDataSetChanged();
     }
 
     @Override
@@ -65,53 +71,52 @@ public class DeviceRecyclerViewAdapter extends RecyclerView.Adapter<DeviceRecycl
         myView = recyclerView;
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(final MyViewHolder holder, final int position) {
-        // TODO：使用 Object 替换 List
-        final String name = (String) myItems.get(position);
+        final String name = devices.get(position).deviceName;
+        final String ip = devices.get(position).ipAddr;
+        final String mac = Utils.trimMACtoShow(devices.get(position).macAddr);
+        final boolean udp = devices.get(position).enableUDP;
+        final boolean wol = devices.get(position).enableWOL;
+        final int did = devices.get(position).did;
         holder.deviceName.setText(name);
-        final String mac = "FF:FF:FF:FF:FF:FF";
-        final String ip = "192.168.255.254";
-
-        // Item 菜单
-        holder.button.setOnClickListener(new View.OnClickListener() {
+        holder.deviceIp.setText(ip);
+        holder.deviceMac.setText(mac);
+        // 弹出菜单
+        holder.popupBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
-                //creating a popup menu
-                PopupMenu popup = new PopupMenu(view.getContext(), holder.button);
-                //inflating menu from xml resource
+                PopupMenu popup = new PopupMenu(view.getContext(), holder.popupBtn);
                 popup.inflate(R.menu.commandoptionmenu);
-                //adding click listener
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         int itemId = item.getItemId(); // 用户点击的菜单 id
                         if (itemId == R.id.commandoptionedit) {
                             // 弹出编辑对话框
+                            final TextInputLayout ipInput;
+                            final TextInputLayout macInput;
+                            final EditText deviceName;
+                            final EditText deviceIp;
+                            final EditText deviceMac;
+                            final CheckBox wolBox;
+                            final CheckBox udpBox;
                             final AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
-
-                            System.out.println("view:");
-                            System.out.println(view); // androidx.appcompat.widget.AppCompatTextView{dd04441 VFED..C.. ........ 970,27-1080,106 #7f080074 app:id/commandlistoptionbtn}
-                            System.out.println("myView:");
-                            System.out.println(myView); // androidx.recyclerview.widget.RecyclerView{39a59bc VFED..... .F...... 0,0-1080,1704 #7f080075 app:id/commandlistview}
-                            System.out.println("view.getContext:");
-                            System.out.println(view.getContext()); // org.konata.udpsender.MainActivity@d40d71b
-
                             builder.setTitle("Edit Device");
-                            // I'm using fragment here so I'm using getView() to provide ViewGroup
-                            // but you can provide here any other instance of ViewGroup from your Fragment / Activity
                             View viewInflated = LayoutInflater.from(view.getContext()).inflate(R.layout.device_add_dialog, (ViewGroup) myView, false);
-                            final EditText deviceName = (EditText) viewInflated.findViewById(R.id.deviceaddname);
-                            final EditText deviceIp = (EditText) viewInflated.findViewById(R.id.deviceaddip);
-                            final EditText deviceMac = (EditText) viewInflated.findViewById(R.id.deviceaddmac);
+                            ipInput = (TextInputLayout) viewInflated.findViewById(R.id.deviceaddipinput);
+                            macInput = (TextInputLayout) viewInflated.findViewById(R.id.deviceaddmacinput);
+                            deviceName = (EditText) viewInflated.findViewById(R.id.deviceaddname);
+                            deviceIp = (EditText) viewInflated.findViewById(R.id.deviceaddip);
+                            deviceMac = (EditText) viewInflated.findViewById(R.id.deviceaddmac);
+                            wolBox = (CheckBox) viewInflated.findViewById(R.id.enablewol);
+                            udpBox = (CheckBox) viewInflated.findViewById(R.id.enableudp);
                             deviceName.setText(name);
                             deviceIp.setText(ip);
                             deviceMac.setText(mac);
-                            final TextInputLayout ipInput = (TextInputLayout) viewInflated.findViewById(R.id.deviceaddipinput);
-                            final TextInputLayout macInput = (TextInputLayout) viewInflated.findViewById(R.id.deviceaddmacinput);
+                            wolBox.setChecked(wol);
+                            udpBox.setChecked(udp);
                             builder.setView(viewInflated);
-
                             builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
@@ -132,17 +137,33 @@ public class DeviceRecyclerViewAdapter extends RecyclerView.Adapter<DeviceRecycl
                             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    String newDeviceName = "";
-                                    String newDeviceIp = "";
-                                    String newDeviceMac = "";
+                                    String newDeviceName;
+                                    String newDeviceIp;
+                                    String newDeviceMac;
+                                    boolean newDeviceUDP;
+                                    boolean newDeviceWOL;
                                     newDeviceName = deviceName.getText().toString();
                                     newDeviceIp = deviceIp.getText().toString();
-                                    newDeviceMac = deviceMac.getText().toString();
+                                    newDeviceMac = Utils.trimMACtoStor(deviceMac.getText().toString());
+                                    newDeviceUDP = udpBox.isChecked();
+                                    newDeviceWOL = wolBox.isChecked();
                                     boolean isIpValid = ipInput.getError() == null;
                                     boolean isMacValid = macInput.getError() == null;
-                                    if (!newDeviceName.isEmpty() && ((!newDeviceIp.isEmpty()) && isIpValid) || (!newDeviceMac.isEmpty() && isMacValid)) {
-                                        Snackbar.make(view, newDeviceName + " Edited Position:" + position, Snackbar.LENGTH_LONG).show();
-                                        dialog.dismiss();
+                                    // 设备名不为空并且ip和mac有一项符合要求
+                                    if (!newDeviceName.isEmpty() && ((!newDeviceIp.isEmpty()) && isIpValid && isMacValid) || (!newDeviceMac.isEmpty() && isMacValid && isIpValid)) {
+                                        if (newDeviceWOL && newDeviceMac.isEmpty()) { // 网络唤醒必须填写MAC地址
+                                            Toast toast = Toast.makeText(view.getContext(), "WoL require MAC address", Toast.LENGTH_SHORT);
+                                            toast.setGravity(Gravity.CENTER, 0, 0);
+                                            toast.show();
+                                        } else {
+                                            Device device = new Device(did, newDeviceName, newDeviceIp, newDeviceMac, newDeviceUDP, newDeviceWOL);
+                                            dialog.dismiss();
+                                            AppDatabase.getDatabase(v.getContext()).deviceDao().updateDevice(device);
+                                            Snackbar.make(view, newDeviceName + " Edited Position:" + position, Snackbar.LENGTH_LONG).show();
+                                            devices.clear();
+                                            devices.addAll(AppDatabase.getDatabase(v.getContext()).deviceDao().getDevices());
+                                            notifyDataSetChanged();
+                                        }
                                     } else {
                                         Toast toast = Toast.makeText(view.getContext(), "Please check your input", Toast.LENGTH_SHORT);
                                         toast.setGravity(Gravity.CENTER, 0, 0);
@@ -190,31 +211,23 @@ public class DeviceRecyclerViewAdapter extends RecyclerView.Adapter<DeviceRecycl
                             });
                             return true;
                         } else if (itemId == R.id.commandoptiondelete) {
-                            Snackbar.make(view, name + " deleted", BaseTransientBottomBar.LENGTH_LONG).setAction("UNDO", new CommandItemDeleteUndoListener()).show();
+                            AppDatabase.getDatabase(view.getContext()).deviceDao().deleteDevice(new Device(did));
+                            Snackbar.make(view, name + " deleted", BaseTransientBottomBar.LENGTH_LONG).show();
+                            refreshData();
                             return true;
                         } else {
                             return false;
                         }
                     }
                 });
-                //displaying the popup
                 popup.show();
             }
         });
     }
 
-    public class CommandItemDeleteUndoListener implements View.OnClickListener {
-
-        @Override
-        public void onClick(View v) {
-            Toast.makeText(v.getContext(), "undo", Toast.LENGTH_SHORT).show();
-            // Code to undo the user's last action
-        }
-    }
-
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        return myItems.size();
+        return devices.size();
     }
 }
