@@ -40,11 +40,11 @@ public class UDPPacketFragment extends Fragment {
 
         // 命令下拉选择列表
         String[] commands = {"命令1", "command2", "turn On", "Restart", "tttteeesssttt"};
-        Spinner spinner = (Spinner) v.findViewById(R.id.presetspinner);
+        Spinner spinner = v.findViewById(R.id.presetspinner);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, commands);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-        sendButton = (Button) v.findViewById(R.id.sendbutton);
+        sendButton = v.findViewById(R.id.sendbutton);
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -53,7 +53,7 @@ public class UDPPacketFragment extends Fragment {
             }
         });
 
-        // 端口输入
+        // 端口输入框
         portText = v.findViewById(R.id.porttext);
         portText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -73,18 +73,23 @@ public class UDPPacketFragment extends Fragment {
                 if (!numPattern.matcher(s.toString()).matches()) {
                     portText.setError("Port must between 1 and 65535");
                 } else {
-                    i = Integer.parseInt(s.toString());
-                    if (i >= 1 && i <= 65535) {
-                        portText.setError(null);
-                    } else {
+                    try {
+                        i = Integer.parseInt(s.toString());
+                        if (i >= 1 && i <= 65535) {
+                            portText.setError(null);
+                        } else {
+                            portText.setError("Port must between 1 and 65535");
+                        }
+                    } catch (NumberFormatException e) {
                         portText.setError("Port must between 1 and 65535");
+
                     }
                 }
             }
         });
 
         // 设备多选列表
-        recyclerView = (RecyclerView) v.findViewById(R.id.udppackettargetdevice);
+        recyclerView = v.findViewById(R.id.udppackettargetdevice);
         recyclerView.setHasFixedSize(true);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 4);
         recyclerView.setLayoutManager(gridLayoutManager);
@@ -99,8 +104,8 @@ public class UDPPacketFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         Button selectAllBtn;
         Button selectNoneBtn;
-        selectAllBtn = (Button) view.findViewById(R.id.selectall);
-        selectNoneBtn = (Button) view.findViewById(R.id.selectnone);
+        selectAllBtn = view.findViewById(R.id.selectall);
+        selectNoneBtn = view.findViewById(R.id.selectnone);
         selectAllBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 ((HomeDeviceRecyclerViewAdapter) mAdapter).selectAll();

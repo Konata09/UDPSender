@@ -27,12 +27,12 @@ public class Repository {
         this.executor = Executors.newFixedThreadPool(4);
     }
 
-    public void makeLoginRequest(final String ip, final int port, final String payload, final RepositoryCallback callback) {
+    public void sendUDPPacket(final String ip, final int port, final String payload, final RepositoryCallback callback) {
         executor.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    Result result = makeSynchronousLoginRequest(ip, port, payload);
+                    Result result = sendSynchronousUDPPacket(ip, port, payload);
                     callback.onComplete(result);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -43,7 +43,7 @@ public class Repository {
         });
     }
 
-    public Result makeSynchronousLoginRequest(String ip, int port, String payload) {
+    public Result sendSynchronousUDPPacket(String ip, int port, String payload) {
         byte[] buf = Utils.hexStringToByteArray(in);
         try {
             socket = new DatagramSocket();
@@ -82,4 +82,6 @@ public class Repository {
             return new Result.Error(e);
         }
     }
+
+
 }

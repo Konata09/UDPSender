@@ -1,10 +1,6 @@
 package org.konata.udpsender;
 
-import android.app.Application;
-
 import androidx.lifecycle.ViewModel;
-
-import java.util.concurrent.Executor;
 
 public class MyViewModel extends ViewModel {
     private static Repository repository;
@@ -14,7 +10,7 @@ public class MyViewModel extends ViewModel {
     }
 
     public void makeRequest(String s) {
-        repository.makeLoginRequest("172.31.160.138",4001, "FFFFFF", new RepositoryCallback() {
+        repository.sendUDPPacket("172.31.160.138",4001, "FFFFFF", new RepositoryCallback() {
             @Override
             public void onComplete(Result result) {
                 if (result instanceof Result.Success) {
