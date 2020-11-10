@@ -1,31 +1,24 @@
 package org.konata.udpsender.util;
 
 import android.app.Activity;
-import android.app.Application;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Environment;
-import android.provider.DocumentsContract;
 import android.util.Log;
 
-import androidx.core.app.ShareCompat;
 import androidx.core.content.FileProvider;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.konata.udpsender.AppDatabase;
 import org.konata.udpsender.UDPSenderApplication;
 import org.konata.udpsender.entity.Command;
+import org.konata.udpsender.entity.Device;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Writer;
@@ -58,7 +51,36 @@ public class ImportExport {
             shareFile(file, context, "Command Configuration");
             return true;
         } catch (Exception e) {
-            Log.e("CommandExport", e.getMessage());
+            Log.e("ExportCommand", e.getMessage());
+            return false;
+        }
+    }
+
+    public static boolean exportDevice(Context context) {
+        List<Device> devices = AppDatabase.getDatabase(context).deviceDao().getDevices();
+        try {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("version", DATAVERSION);
+            JSONArray jsonArray = new JSONArray();
+            for (Device d : devices) {
+                JSONObject singleDev = new JSONObject();
+                singleDev.put("name", d.deviceName);
+                singleDev.put("ip", d.ipAddr);
+                singleDev.put("mac", d.macAddr);
+                singleDev.put("enUDP", d.enableUDP);
+                singleDev.put("enWOL", d.enableWOL);
+                jsonArray.put(singleDev);
+            }
+            jsonObject.put("dev", jsonArray);
+            Log.d("ExportDevice", jsonObject.toString());
+            File file = new File(context.getFilesDir(), "udpsender_dev.json");
+            Writer writer = new BufferedWriter(new FileWriter(file));
+            writer.write(jsonObject.toString());
+            writer.close();
+            shareFile(file, context, "Device List");
+            return true;
+        } catch (Exception e) {
+            Log.e("ExportDevice", e.getMessage());
             return false;
         }
     }
@@ -79,13 +101,32 @@ public class ImportExport {
             AppDatabase.getDatabase(UDPSenderApplication.getAppContext()).commandDao().insertCommand(commands);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("Import Command", e.getMessage());
             return false;
         }
     }
 
     public static boolean importDevice(JSONObject json) {
-        return false;
+        try {
+            int version = (int) json.get("version");
+            JSONArray jsonArray = (JSONArray) json.get("dev");
+            Device[] devices = new Device[jsonArray.length()];
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject singleDev = jsonArray.getJSONObject(i);
+                String name = (String) singleDev.get("name");
+                String ip = (String) singleDev.get("ip");
+                String mac = (String) singleDev.get("mac");
+                boolean enUDP = (boolean) singleDev.get("enUDP");
+                boolean enWoL = (boolean) singleDev.get("enWOL");
+                Device device = new Device(name, ip, mac, enUDP, enWoL);
+                devices[i] = device;
+            }
+            AppDatabase.getDatabase(UDPSenderApplication.getAppContext()).deviceDao().insertDevice(devices);
+            return true;
+        } catch (Exception e) {
+            Log.e("Import Command", e.getMessage());
+            return false;
+        }
     }
 
     public static void shareFile(File file, Context context, String filedesp) {

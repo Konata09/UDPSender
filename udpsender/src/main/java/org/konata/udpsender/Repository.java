@@ -18,10 +18,7 @@ public class Repository {
     //    private byte[] buf = new byte[256];
 //    private byte[] buf = "abc234".getBytes();
     private String in = "4C696768746F6EFE051452016CFF";
-    private int REPEAT = 3;
-//    private int port = 9;
-//    private String targetIP = "172.31.161.200";
-//    private String payload = "FFFFFFFF";
+    private int REPEAT = 3; // 重复发送次数
 
     public Repository() {
         this.executor = Executors.newFixedThreadPool(4);

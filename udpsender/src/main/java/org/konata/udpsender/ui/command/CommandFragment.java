@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.DocumentsContract;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -26,7 +25,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -34,15 +32,8 @@ import org.konata.udpsender.AppDatabase;
 import org.konata.udpsender.R;
 import org.konata.udpsender.entity.Command;
 import org.konata.udpsender.util.ImportExport;
-import org.konata.udpsender.util.Utils;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class CommandFragment extends Fragment {
@@ -53,10 +44,9 @@ public class CommandFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_command, container, false);
         setHasOptionsMenu(true);
-//        final List<Command> commands;
 
         // 命令列表
-        RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.commandlistview);
+        RecyclerView recyclerView = v.findViewById(R.id.commandlistview);
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -83,11 +73,11 @@ public class CommandFragment extends Fragment {
                 builder.setTitle("Add New Command");
 
                 View viewInflated = LayoutInflater.from(getContext()).inflate(R.layout.command_add_dialog, (ViewGroup) getView(), false);
-                commandName = (EditText) viewInflated.findViewById(R.id.commandaddname);
-                commandValue = (EditText) viewInflated.findViewById(R.id.commandaddvalue);
-                commandPort = (EditText) viewInflated.findViewById(R.id.commandaddport);
-                valueInput = (TextInputLayout) viewInflated.findViewById(R.id.commandaddvalueinput);
-                portInput = (TextInputLayout) viewInflated.findViewById(R.id.commandaddportinput);
+                commandName = viewInflated.findViewById(R.id.commandaddname);
+                commandValue = viewInflated.findViewById(R.id.commandaddvalue);
+                commandPort = viewInflated.findViewById(R.id.commandaddport);
+                valueInput = viewInflated.findViewById(R.id.commandaddvalueinput);
+                portInput = viewInflated.findViewById(R.id.commandaddportinput);
                 builder.setView(viewInflated);
 
                 builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -210,11 +200,11 @@ public class CommandFragment extends Fragment {
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 2 && resultCode == Activity.RESULT_OK) {
             Uri uri;
-            if (resultData != null) {
-                uri = resultData.getData();
+            if (data != null) {
+                uri = data.getData();
                 Log.i("Export", "Uri: " + uri.toString());
                 if (ImportExport.importFile(uri, getActivity(), 1)) {
                     refreshData();
@@ -227,9 +217,9 @@ public class CommandFragment extends Fragment {
     }
 
      void refreshData() {
-        commands.clear();
-        commands.addAll(AppDatabase.getDatabase(getView().getContext()).commandDao().getCommands());
-        mAdapter.notifyDataSetChanged();
+         commands.clear();
+         commands.addAll(AppDatabase.getDatabase(getContext()).commandDao().getCommands());
+         mAdapter.notifyDataSetChanged();
     }
 
 }
