@@ -29,7 +29,7 @@ public class WakeOnLanFragment extends Fragment {
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 4);
         recyclerView.setLayoutManager(gridLayoutManager);
         String[] devices = {"1111", "22", "3", "设备4", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555"};
-        mAdapter = new HomeDeviceRecyclerViewAdapter(devices);
+//        mAdapter = new HomeDeviceRecyclerViewAdapter(devices);
         recyclerView.setAdapter(mAdapter);
 
         return v;

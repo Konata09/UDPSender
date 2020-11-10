@@ -1,7 +1,5 @@
 package org.konata.udpsender.util;
 
-import java.util.regex.Pattern;
-
 public class Utils {
     public static String trimMACtoShow(String in) {
         if (in.isEmpty())
@@ -15,7 +13,7 @@ public class Utils {
     }
 
 
-    public static byte[] hexStringToByteArray(String hexString) {
+    public static byte[] hexStringToByteArray(String hexString) throws StringIndexOutOfBoundsException {
         int len = hexString.length();
         byte[] data = new byte[len / 2];
         for (int i = 0; i < len; i += 2) {

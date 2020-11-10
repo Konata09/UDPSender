@@ -1,5 +1,5 @@
 package org.konata.udpsender;
 
-interface RepositoryCallback<T> {
-    void onComplete(Result<T> result);
+public interface RepositoryCallback {
+    void onComplete(Result result);
 }

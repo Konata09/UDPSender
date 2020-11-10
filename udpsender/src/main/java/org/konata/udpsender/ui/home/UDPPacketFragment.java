@@ -6,23 +6,32 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
+
+import org.konata.udpsender.AppDatabase;
 import org.konata.udpsender.MyViewModel;
 import org.konata.udpsender.R;
-import org.konata.udpsender.Repository;
+import org.konata.udpsender.RepositoryCallback;
+import org.konata.udpsender.Result;
+import org.konata.udpsender.entity.Command;
+import org.konata.udpsender.entity.Device;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class UDPPacketFragment extends Fragment {
@@ -34,24 +43,9 @@ public class UDPPacketFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_udp_packet, container, false);
+        final RadioGroup radioGroup;
         Button sendButton;
         final EditText portText;
-
-
-        // 命令下拉选择列表
-        String[] commands = {"命令1", "command2", "turn On", "Restart", "tttteeesssttt"};
-        Spinner spinner = v.findViewById(R.id.presetspinner);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, commands);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-        sendButton = v.findViewById(R.id.sendbutton);
-        sendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                model = new ViewModelProvider(getActivity()).get(MyViewModel.class);
-                model.makeRequest("asd");
-            }
-        });
 
         // 端口输入框
         portText = v.findViewById(R.id.porttext);
@@ -88,15 +82,76 @@ public class UDPPacketFragment extends Fragment {
             }
         });
 
+        // 命令下拉选择列表
+        final List<Command> commands = AppDatabase.getDatabase(getContext()).commandDao().getCommands();
+        ArrayAdapter<Command> adapter = new SpinnerAdapter(getActivity(), android.R.layout.simple_spinner_item, commands);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        final Spinner spinner = v.findViewById(R.id.presetspinner);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Command selectedCommand = commands.get(position);
+                portText.setText(String.valueOf(selectedCommand.port));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        // 手动命令和预设命令选择
+        final EditText customCmdEditText = v.findViewById(R.id.customvalue);
+        radioGroup = v.findViewById(R.id.radioGroup);
+
         // 设备多选列表
         recyclerView = v.findViewById(R.id.udppackettargetdevice);
         recyclerView.setHasFixedSize(true);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 4);
         recyclerView.setLayoutManager(gridLayoutManager);
-        String[] devices = {"1111", "dev22", "dev333", "西楼大厅", "西楼保密室", "西办公楼保密室2", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "dev22", "dev333", "dev444", "dev555", "asd", "asddd"};
+        final List<Device> devices = AppDatabase.getDatabase(getContext()).deviceDao().getDevices();
         mAdapter = new HomeDeviceRecyclerViewAdapter(devices);
         recyclerView.setAdapter(mAdapter);
 
+        // 发送数据包
+        sendButton = v.findViewById(R.id.sendbutton);
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                model = new ViewModelProvider(getActivity()).get(MyViewModel.class);
+                String payload = "";
+                List<Device> targetDeviceList = new ArrayList<>();
+                int port = Integer.parseInt(portText.getText().toString());
+
+                if (radioGroup.getCheckedRadioButtonId() == R.id.usepreset) {
+                    payload = ((Command) spinner.getSelectedItem()).commandValue;
+                } else if (radioGroup.getCheckedRadioButtonId() == R.id.usecustom) {
+                    payload = customCmdEditText.getText().toString();
+                }
+
+                targetDeviceList.clear();
+                for (int i = 0; i < devices.size(); i++) {
+                    HomeDeviceRecyclerViewAdapter.DevViewHolder holder = (HomeDeviceRecyclerViewAdapter.DevViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+                    if (holder.checkBox.isChecked()) {
+                        targetDeviceList.add(holder.device);
+                    }
+                }
+
+                model.getRepository().sendUDPPacket(targetDeviceList, port, payload, new RepositoryCallback() {
+                    @Override
+                    public void onComplete(Result result) {
+                        if (result instanceof Result.Success) {
+                            Snackbar.make(getView(), "Send Successuflly", Snackbar.LENGTH_LONG).show();
+                        } else {
+                            for (Result.Error e : ((List<Result.Error>) ((Result.Errors) result).errorList)) {
+                                Snackbar.make(getView(), "Send Failed." + e.message + " " + e.exception, Snackbar.LENGTH_LONG).show();
+                            }
+                        }
+                    }
+                });
+            }
+        });
         return v;
     }
 

@@ -191,7 +191,7 @@ public class CommandFragment extends Fragment {
                 if (ImportExport.exportCommand(this.getContext())) {
                     Snackbar.make(getView(), "Export Successfully", Snackbar.LENGTH_LONG).show();
                 } else {
-                    Snackbar.make(getView(), "Export Fail", Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(getView(), "Export Failed", Snackbar.LENGTH_LONG).show();
                 }
                 return true;
             default:
@@ -210,7 +210,7 @@ public class CommandFragment extends Fragment {
                     refreshData();
                     Snackbar.make(getView(), "Import Successfully", Snackbar.LENGTH_LONG).show();
                 } else {
-                    Snackbar.make(getView(), "Import Fail", Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(getView(), "Import Failed", Snackbar.LENGTH_LONG).show();
                 }
             }
         }
