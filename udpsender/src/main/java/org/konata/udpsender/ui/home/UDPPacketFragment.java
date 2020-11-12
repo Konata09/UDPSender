@@ -45,8 +45,8 @@ public class UDPPacketFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_udp_packet, container, false);
-        final RadioGroup radioGroup;
         Button sendButton;
+        final RadioGroup radioGroup;
         final EditText portText;
 
         // 端口输入框
@@ -112,12 +112,12 @@ public class UDPPacketFragment extends Fragment {
         recyclerView.setHasFixedSize(true);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 4);
         recyclerView.setLayoutManager(gridLayoutManager);
-        final List<Device> devices = AppDatabase.getDatabase(getContext()).deviceDao().getDevices();
+        final List<Device> devices = AppDatabase.getDatabase(getContext()).deviceDao().getUDPDevices();
         mAdapter = new HomeDeviceRecyclerViewAdapter(devices);
         recyclerView.setAdapter(mAdapter);
 
         // 发送数据包
-        sendButton = v.findViewById(R.id.sendbutton);
+        sendButton = v.findViewById(R.id.udpsendbutton);
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

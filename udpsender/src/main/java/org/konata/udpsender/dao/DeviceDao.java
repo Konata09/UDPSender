@@ -17,6 +17,12 @@ public interface DeviceDao {
     @Query("SELECT * FROM device")
     List<Device> getDevices();
 
+    @Query("SELECT * FROM device WHERE enableUDP=1")
+    List<Device> getUDPDevices();
+
+    @Query("SELECT * FROM device WHERE enableWOL=1")
+    List<Device> getWoLDevices();
+
     @Delete
     void deleteDevice(Device... devices);
 

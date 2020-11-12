@@ -60,7 +60,7 @@ public class Repository {
                 @Override
                 public void run() {
                     Device d = devices.get(finalI);
-//                    String payload = d.macAddr
+                    String payload = genWOLPayload(d.macAddr);
                     try {
                         sendSynchronousUDPPacket(d.ipAddr, port, payload);
                         Log.d("SendUDPPacket", "SUCCESS: " + d.ipAddr + " PORT:" + port + " DATA:" + payload);
@@ -120,6 +120,10 @@ public class Repository {
     }
 
     String genWOLPayload(String mac) {
-        return "FFFFFFFFFFFF" +
+        StringBuilder stringBuilder = new StringBuilder("FFFFFFFFFFFF");
+        for (int i = 0; i < 16; i++) {
+            stringBuilder = stringBuilder.append(mac);
+        }
+        return stringBuilder.toString();
     }
 }
