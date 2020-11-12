@@ -78,22 +78,35 @@ public class Repository {
     }
 
     private void sendSynchronousUDPPacket(String ip, int port, String payload) throws Exception {
-        byte[] buf = Utils.hexStringToByteArray(payload);
+        byte[] buf;
         int count = 0;
         List<Exception> exceptionsList = new ArrayList<>();
         DatagramSocket socket = new DatagramSocket();
-        while (count < REPEAT) {
-            try {
+
+        if (payload.contains(";")) {    // 多数据包命令不重复发送
+            String[] split = payload.split(";");
+            for (int i = 0; i < split.length; i++) {
+                buf = Utils.hexStringToByteArray(split[i]);
                 DatagramPacket packet;
                 InetAddress address = InetAddress.getByName(ip);
                 packet = new DatagramPacket(buf, buf.length, address, port);
                 socket.send(packet);
-            } catch (IOException e) {
+            }
+        } else {
+            buf = Utils.hexStringToByteArray(payload);
+            while (count < REPEAT) {
+                try {
+                    DatagramPacket packet;
+                    InetAddress address = InetAddress.getByName(ip);
+                    packet = new DatagramPacket(buf, buf.length, address, port);
+                    socket.send(packet);
+                } catch (IOException e) {
 //                System.out.println("err" + count + " " + ip);
-                exceptionsList.add(e);
-            } finally {
+                    exceptionsList.add(e);
+                } finally {
 //                System.out.println(count + " " + ip);
-                count++;
+                    count++;
+                }
             }
         }
         socket.close();

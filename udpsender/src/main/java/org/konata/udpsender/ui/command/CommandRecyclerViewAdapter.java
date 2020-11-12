@@ -152,7 +152,7 @@ public class CommandRecyclerViewAdapter extends RecyclerView.Adapter<CommandRecy
 
                                 @Override
                                 public void afterTextChanged(Editable s) {
-                                    Pattern hexPattern = Pattern.compile("(^[A-Fa-f0-9]+$|^$)");
+                                    Pattern hexPattern = Pattern.compile("(^[A-Fa-f0-9;]+$|^$)");
                                     if (!hexPattern.matcher(s.toString()).matches()) {
                                         valueInput.setError("Hexadecimal Required");
                                     } else {
