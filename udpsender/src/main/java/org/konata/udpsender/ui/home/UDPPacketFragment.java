@@ -144,9 +144,7 @@ public class UDPPacketFragment extends Fragment {
                         if (result instanceof Result.Success) {
                             Snackbar.make(getView(), "Send Successuflly", Snackbar.LENGTH_LONG).show();
                         } else {
-                            for (Result.Error e : ((List<Result.Error>) ((Result.Errors) result).errorList)) {
-                                Snackbar.make(getView(), "Send Failed." + e.message + " " + e.exception, Snackbar.LENGTH_LONG).show();
-                            }
+                            Snackbar.make(getView(), "Some packect send failed, see logs for details", Snackbar.LENGTH_LONG).show();
                         }
                     }
                 });

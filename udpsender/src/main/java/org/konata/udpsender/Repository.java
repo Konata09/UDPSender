@@ -1,5 +1,7 @@
 package org.konata.udpsender;
 
+import android.util.Log;
+
 import org.konata.udpsender.entity.Device;
 import org.konata.udpsender.util.Utils;
 
@@ -13,11 +15,10 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class Repository {
-    private final String loginUrl = "https://www.baidu.com";
+//    private final String loginUrl = "https://www.baidu.com";
     // private final ResponseParser responseParser;
 
     private final Executor executor;
-    private DatagramSocket socket;
     private int REPEAT = 3; // 重复发送次数
 
     public Repository() {
@@ -25,42 +26,35 @@ public class Repository {
     }
 
     public void sendUDPPacket(final List<Device> devices, final int port, final String payload, final RepositoryCallback callback) {
-        final List<Result.Error> errors = new ArrayList<>();
-        for (final Device d : devices) {
+        final boolean[] allSuccess = {true};
+
+        for (int i = 0; i < devices.size(); i++) {
+            final int finalI = i;
             executor.execute(new Runnable() {
                 @Override
                 public void run() {
+                    Device d = devices.get(finalI);
                     try {
                         sendSynchronousUDPPacket(d.ipAddr, port, payload);
-                        System.out.println("Succ:" + d.ipAddr + " " + port + " " + payload);
+                        Log.d("SendUDPPacket", "SUCCESS:" + d.ipAddr + " " + port + " " + payload);
                     } catch (Exception e) {
                         e.printStackTrace();
-                        System.out.println(d.deviceName);
-                        errors.add(new Result.Error<>(e, d.deviceName));
-                        System.out.println(errors.size());
+                        allSuccess[0] = false;
+                        Log.d("SendUDPPacket", "FAIL:" + e.getMessage() + " " + d.ipAddr + " " + port + " " + payload);
+                    }
+                    if (devices.size() == finalI + 1) { // 最后一个目标设备执行callback通知调用函数 可能有Bug
+                        callback.onComplete(allSuccess[0] ? new Result.Success(null) : new Result.Errors(null));
                     }
                 }
             });
         }
-        System.out.println(errors.size());
-        if (errors.size() == 0)
-            callback.onComplete(new Result.Success("OK"));
-        else
-            callback.onComplete(new Result.Errors(errors));
     }
 
-    private Result sendSynchronousUDPPacket(String ip, int port, String payload) throws Exception {
-        byte[] buf;
-//        try {
-        buf = Utils.hexStringToByteArray(payload);
-//        } catch (StringIndexOutOfBoundsException ee) {
-//            System.out.println("ee");
-//            return new Result.Error(ee, "Bad payload");
-//        }
-
-//        try {
-        socket = new DatagramSocket();
+    private void sendSynchronousUDPPacket(String ip, int port, String payload) throws Exception {
+        byte[] buf = Utils.hexStringToByteArray(payload);
         int count = 0;
+        List<Exception> exceptionsList = new ArrayList<>();
+        DatagramSocket socket = new DatagramSocket();
         while (count < REPEAT) {
             try {
                 DatagramPacket packet;
@@ -68,12 +62,17 @@ public class Repository {
                 packet = new DatagramPacket(buf, buf.length, address, port);
                 socket.send(packet);
             } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println(count);
-                }
+//                System.out.println("err" + count + " " + ip);
+                exceptionsList.add(e);
+            } finally {
+//                System.out.println(count + " " + ip);
                 count++;
             }
-            socket.close();
+        }
+        socket.close();
+        for (Exception e : exceptionsList) {
+            throw e; // 只能返回某个地址的第一个错误 但不会中断上面的循环
+        }
 
 //            URL url = new URL(loginUrl);
 //            HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
@@ -91,9 +90,5 @@ public class Repository {
 //            inputStreamReader.close();
 //            inputStream.close();
 
-        return new Result.Success("OK");
-//        } catch (Exception e) {
-//            return new Result.Error(e, ip);
-//        }
     }
 }

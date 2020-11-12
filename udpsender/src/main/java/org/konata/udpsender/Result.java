@@ -1,7 +1,5 @@
 package org.konata.udpsender;
 
-import java.util.List;
-
 public abstract class Result<T> {
     private Result() {
     }
@@ -24,11 +22,17 @@ public abstract class Result<T> {
         }
     }
 
-    public static final class Errors<T> extends Result<T> {
-        public List errorList;
+    public static final class ErrorWithoutParam<T> extends Result<T> {
 
-        public Errors(List list) {
-            this.errorList = list;
+        public ErrorWithoutParam() {
+        }
+    }
+
+    public static final class Errors<T> extends Result<T> {
+        public T data;
+
+        public Errors(T data) {
+            this.data = data;
         }
     }
 }
