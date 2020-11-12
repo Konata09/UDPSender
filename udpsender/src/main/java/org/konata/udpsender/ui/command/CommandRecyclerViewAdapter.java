@@ -24,6 +24,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import org.konata.udpsender.AppDatabase;
 import org.konata.udpsender.R;
 import org.konata.udpsender.entity.Command;
+import org.konata.udpsender.util.Utils;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -127,7 +128,7 @@ public class CommandRecyclerViewAdapter extends RecyclerView.Adapter<CommandRecy
                                     boolean isValueValid = valueInput.getError() == null;
                                     boolean isPortValid = portInput.getError() == null;
                                     if (isValueValid && isPortValid && !newCommandName.isEmpty() && !newCommandValue.isEmpty() && !newCommandPort.isEmpty()) {
-                                        Command command = new Command(cid, newCommandName, newCommandValue, Integer.parseInt(newCommandPort));
+                                        Command command = new Command(cid, newCommandName, Utils.trimCommandToStor(newCommandValue), Integer.parseInt(newCommandPort));
                                         AppDatabase.getDatabase(view.getContext()).commandDao().updateCommand(command);
                                         dialog.dismiss();
                                         Snackbar.make(view, newCommandName + " Edited Position:" + position, Snackbar.LENGTH_LONG).show();

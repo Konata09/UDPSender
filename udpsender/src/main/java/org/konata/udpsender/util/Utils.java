@@ -12,6 +12,9 @@ public class Utils {
         return in.replace(":", "").replace("-", "").toUpperCase();
     }
 
+    public static String trimCommandToStor(String in) {
+        return in.toUpperCase();
+    }
 
     public static byte[] hexStringToByteArray(String hexString) throws StringIndexOutOfBoundsException {
         int len = hexString.length();

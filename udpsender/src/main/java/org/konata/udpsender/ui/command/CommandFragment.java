@@ -32,6 +32,7 @@ import org.konata.udpsender.AppDatabase;
 import org.konata.udpsender.R;
 import org.konata.udpsender.entity.Command;
 import org.konata.udpsender.util.ImportExport;
+import org.konata.udpsender.util.Utils;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -104,7 +105,7 @@ public class CommandFragment extends Fragment {
                         boolean isPortVaild = portInput.getError() == null;
 
                         if (isValueValid && isPortVaild && !newCommandName.isEmpty() && !newCommandValue.isEmpty() && !newCommandPort.isEmpty()) {
-                            Command command = new Command(newCommandName, newCommandValue, Integer.parseInt(newCommandPort));
+                            Command command = new Command(newCommandName, Utils.trimCommandToStor(newCommandValue), Integer.parseInt(newCommandPort));
                             dialog.dismiss();
                             AppDatabase.getDatabase(getContext()).commandDao().insertCommand(command);
                             Snackbar.make(v, newCommandName + " Added", Snackbar.LENGTH_LONG).show();
@@ -216,10 +217,10 @@ public class CommandFragment extends Fragment {
         }
     }
 
-     void refreshData() {
-         commands.clear();
-         commands.addAll(AppDatabase.getDatabase(getContext()).commandDao().getCommands());
-         mAdapter.notifyDataSetChanged();
+    void refreshData() {
+        commands.clear();
+        commands.addAll(AppDatabase.getDatabase(getContext()).commandDao().getCommands());
+        mAdapter.notifyDataSetChanged();
     }
 
 }

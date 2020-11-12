@@ -3,6 +3,7 @@ package org.konata.udpsender.ui.home;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -119,35 +121,41 @@ public class UDPPacketFragment extends Fragment {
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                model = new ViewModelProvider(getActivity()).get(MyViewModel.class);
-                String payload = "";
-                List<Device> targetDeviceList = new ArrayList<>();
-                int port = Integer.parseInt(portText.getText().toString());
+                if (portText.getError() == null) {
+                    model = new ViewModelProvider(getActivity()).get(MyViewModel.class);
+                    String payload = "";
+                    List<Device> targetDeviceList = new ArrayList<>();
+                    int port = Integer.parseInt(portText.getText().toString());
 
-                if (radioGroup.getCheckedRadioButtonId() == R.id.usepreset) {
-                    payload = ((Command) spinner.getSelectedItem()).commandValue;
-                } else if (radioGroup.getCheckedRadioButtonId() == R.id.usecustom) {
-                    payload = customCmdEditText.getText().toString();
-                }
-
-                targetDeviceList.clear();
-                for (int i = 0; i < devices.size(); i++) {
-                    HomeDeviceRecyclerViewAdapter.DevViewHolder holder = (HomeDeviceRecyclerViewAdapter.DevViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
-                    if (holder.checkBox.isChecked()) {
-                        targetDeviceList.add(holder.device);
+                    if (radioGroup.getCheckedRadioButtonId() == R.id.usepreset) {
+                        payload = ((Command) spinner.getSelectedItem()).commandValue;
+                    } else if (radioGroup.getCheckedRadioButtonId() == R.id.usecustom) {
+                        payload = customCmdEditText.getText().toString();
                     }
-                }
 
-                model.getRepository().sendUDPPacket(targetDeviceList, port, payload, new RepositoryCallback() {
-                    @Override
-                    public void onComplete(Result result) {
-                        if (result instanceof Result.Success) {
-                            Snackbar.make(getView(), "Send Successuflly", Snackbar.LENGTH_LONG).show();
-                        } else {
-                            Snackbar.make(getView(), "Some packect send failed, see logs for details", Snackbar.LENGTH_LONG).show();
+                    targetDeviceList.clear();
+                    for (int i = 0; i < devices.size(); i++) {
+                        HomeDeviceRecyclerViewAdapter.DevViewHolder holder = (HomeDeviceRecyclerViewAdapter.DevViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+                        if (holder.checkBox.isChecked()) {
+                            targetDeviceList.add(holder.device);
                         }
                     }
-                });
+
+                    model.getRepository().sendUDPPacket(targetDeviceList, port, payload, new RepositoryCallback() {
+                        @Override
+                        public void onComplete(Result result) {
+                            if (result instanceof Result.Success) {
+                                Snackbar.make(getView(), "Send Successuflly", Snackbar.LENGTH_LONG).show();
+                            } else {
+                                Snackbar.make(getView(), "Some packect send failed, see logs for details", Snackbar.LENGTH_LONG).show();
+                            }
+                        }
+                    });
+                } else {
+                    Toast toast = Toast.makeText(getContext(), "Please check your input", Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                }
             }
         });
         return v;

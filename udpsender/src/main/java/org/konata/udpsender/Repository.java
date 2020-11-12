@@ -36,11 +36,38 @@ public class Repository {
                     Device d = devices.get(finalI);
                     try {
                         sendSynchronousUDPPacket(d.ipAddr, port, payload);
-                        Log.d("SendUDPPacket", "SUCCESS:" + d.ipAddr + " " + port + " " + payload);
+                        Log.d("SendUDPPacket", "SUCCESS: " + d.ipAddr + " PORT:" + port + " DATA:" + payload);
                     } catch (Exception e) {
                         e.printStackTrace();
                         allSuccess[0] = false;
-                        Log.d("SendUDPPacket", "FAIL:" + e.getMessage() + " " + d.ipAddr + " " + port + " " + payload);
+                        Log.d("SendUDPPacket", "FAIL:" + e.getMessage() + " IP:" + d.ipAddr + " PORT:" + port + " DATA:" + payload);
+                    }
+                    if (devices.size() == finalI + 1) { // 最后一个目标设备执行callback通知调用函数 可能有Bug
+                        callback.onComplete(allSuccess[0] ? new Result.Success(null) : new Result.Errors(null));
+                    }
+                }
+            });
+        }
+    }
+
+    public void sendWoLPacket(final List<Device> devices, final RepositoryCallback callback) {
+        final boolean[] allSuccess = {true};
+        final int port = 9;
+
+        for (int i = 0; i < devices.size(); i++) {
+            final int finalI = i;
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Device d = devices.get(finalI);
+//                    String payload = d.macAddr
+                    try {
+                        sendSynchronousUDPPacket(d.ipAddr, port, payload);
+                        Log.d("SendUDPPacket", "SUCCESS: " + d.ipAddr + " PORT:" + port + " DATA:" + payload);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        allSuccess[0] = false;
+                        Log.d("SendUDPPacket", "FAIL:" + e.getMessage() + " IP:" + d.ipAddr + " PORT:" + port + " DATA:" + payload);
                     }
                     if (devices.size() == finalI + 1) { // 最后一个目标设备执行callback通知调用函数 可能有Bug
                         callback.onComplete(allSuccess[0] ? new Result.Success(null) : new Result.Errors(null));
@@ -90,5 +117,9 @@ public class Repository {
 //            inputStreamReader.close();
 //            inputStream.close();
 
+    }
+
+    String genWOLPayload(String mac) {
+        return "FFFFFFFFFFFF" +
     }
 }
