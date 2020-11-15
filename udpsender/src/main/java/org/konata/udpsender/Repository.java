@@ -71,11 +71,11 @@ public class Repository {
                             sendSynchronousUDPPacket("255.255.255.255", port, payload);
                         if (toDeviceAddr)
                             sendSynchronousUDPPacket(d.ipAddr, port, payload);
-                        Log.d("SendUDPPacket", "SUCCESS: " + d.deviceName + " PORT:" + port + " DATA:" + payload);
+                        Log.d("sendWoLPacket", "SUCCESS: " + d.deviceName + " PORT:" + port + " DATA:" + payload);
                     } catch (Exception e) {
                         e.printStackTrace();
                         allSuccess[0] = false;
-                        Log.d("SendUDPPacket", "FAIL:" + e.getMessage() + " IP:" + d.ipAddr + " PORT:" + port + " DATA:" + payload);
+                        Log.d("sendWoLPacket", "FAIL:" + e.getMessage() + " IP:" + d.deviceName + " PORT:" + port + " DATA:" + payload);
                     }
                     if (devices.size() == finalI + 1) { // 最后一个目标设备执行callback通知调用函数 可能有Bug
                         callback.onComplete(allSuccess[0] ? new Result.Success(null) : new Result.Errors(null));
