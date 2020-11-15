@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -35,6 +36,15 @@ public class WakeOnLanFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_wake_on_lan, container, false);
         Button sendButton;
+        final CheckBox toDeviceAddress;
+        final CheckBox toBroadcastAddress;
+        final CheckBox toDeviceBroadcastAddress;
+
+        // magic packet 目标地址
+        toDeviceAddress = v.findViewById(R.id.woldeviceip);
+        toBroadcastAddress = v.findViewById(R.id.wolbroad255);
+        toDeviceBroadcastAddress = v.findViewById(R.id.woldevice255);
+
 
         // 设备多选列表
         recyclerView = v.findViewById(R.id.udppackettargetdevice);
@@ -49,6 +59,13 @@ public class WakeOnLanFragment extends Fragment {
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                boolean toDeviceAddr = toDeviceAddress.isChecked();
+                boolean toBroadcast = toBroadcastAddress.isChecked();
+                boolean toDeviceBroadcast = toDeviceBroadcastAddress.isChecked();
+                if (!toDeviceAddr && !toBroadcast && !toDeviceBroadcast) {
+                    Snackbar.make(getView(), "You must specify at least one address", Snackbar.LENGTH_SHORT).show();
+                    return;
+                }
                 model = new ViewModelProvider(getActivity()).get(MyViewModel.class);
                 List<Device> targetDeviceList = new ArrayList<>();
                 targetDeviceList.clear();
@@ -58,7 +75,7 @@ public class WakeOnLanFragment extends Fragment {
                         targetDeviceList.add(holder.device);
                     }
                 }
-                model.getRepository().sendWoLPacket(targetDeviceList, new RepositoryCallback() {
+                model.getRepository().sendWoLPacket(targetDeviceList, toDeviceAddr, toBroadcast, toDeviceBroadcast, new RepositoryCallback() {
                     @Override
                     public void onComplete(Result result) {
                         if (result instanceof Result.Success) {

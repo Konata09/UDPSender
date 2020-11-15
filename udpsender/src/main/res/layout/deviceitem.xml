@@ -2,57 +2,59 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true"
-    android:background="?attr/selectableItemBackground"
     android:minHeight="60dp">
 
     <TextView
         android:id="@+id/deviceitemname"
         android:layout_width="wrap_content"
-        android:textColor="@color/listtitle"
         android:layout_height="wrap_content"
         android:maxLines="1"
         android:paddingStart="16dp"
         android:paddingTop="4dp"
         android:paddingEnd="16dp"
-        android:text="设备"
+        android:text="设备名123"
+        android:textColor="@color/listtitle"
         android:textSize="18sp" />
 
     <TextView
         android:id="@+id/deviceitemip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:maxLines="1"
         android:layout_below="@id/deviceitemname"
+        android:fontFamily="monospace"
+        android:maxLines="1"
         android:paddingStart="16dp"
         android:paddingTop="4dp"
         android:paddingEnd="16dp"
-        android:fontFamily="monospace"
+        android:text="255.234.190.178"
         android:textColor="@color/devicelistsubtext"
-        android:textSize="14sp" />
+        android:textSize="13sp" />
 
     <TextView
         android:id="@+id/deviceitemac"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:maxLines="1"
         android:layout_below="@id/deviceitemname"
         android:layout_toStartOf="@id/devicelistoptionbtn"
+        android:fontFamily="monospace"
+        android:maxLines="1"
         android:paddingTop="4dp"
         android:paddingEnd="22dp"
-        android:fontFamily="monospace"
+        android:text="AA:BB:CC:DD:EE:FF"
         android:textColor="@color/devicelistsubtext"
-        android:textSize="14sp" />
+        android:textSize="13sp" />
 
     <TextView
         android:id="@+id/devicelistoptionbtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
-        android:paddingEnd="24dp"
+        android:layout_centerVertical="true"
         android:paddingStart="10dp"
+        android:paddingEnd="24dp"
         android:text="&#8942;"
         android:textAppearance="?android:textAppearanceLarge"
         android:textColor="@color/listtitle"

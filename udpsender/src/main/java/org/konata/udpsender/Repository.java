@@ -50,7 +50,7 @@ public class Repository {
         }
     }
 
-    public void sendWoLPacket(final List<Device> devices, final RepositoryCallback callback) {
+    public void sendWoLPacket(final List<Device> devices, final boolean toDeviceAddr, final boolean toBroadcast, final boolean toDeviceBroadcast, final RepositoryCallback callback) {
         final boolean[] allSuccess = {true};
         final int port = 9;
 
@@ -62,8 +62,18 @@ public class Repository {
                     Device d = devices.get(finalI);
                     String payload = genWOLPayload(d.macAddr);
                     try {
-                        sendSynchronousUDPPacket(d.ipAddr, port, payload);
-                        Log.d("SendUDPPacket", "SUCCESS: " + d.ipAddr + " PORT:" + port + " DATA:" + payload);
+                        if (toDeviceBroadcast) {
+                            String devBroadIp;
+                            devBroadIp = d.ipAddr.replaceFirst("\\.\\d{1,3}$", ".255");
+//                            String[] split = d.ipAddr.split("^(.*)\\.\\d{1,3}$");
+//                            devBroadIp = split[0].concat(".255");
+                            sendSynchronousUDPPacket(devBroadIp, port, payload);
+                        }
+                        if (toBroadcast)
+                            sendSynchronousUDPPacket("255.255.255.255", port, payload);
+                        if (toDeviceAddr)
+                            sendSynchronousUDPPacket(d.ipAddr, port, payload);
+                        Log.d("SendUDPPacket", "SUCCESS: " + d.deviceName + " PORT:" + port + " DATA:" + payload);
                     } catch (Exception e) {
                         e.printStackTrace();
                         allSuccess[0] = false;
@@ -82,10 +92,12 @@ public class Repository {
         int count = 0;
         List<Exception> exceptionsList = new ArrayList<>();
         DatagramSocket socket = new DatagramSocket();
+        Log.d("sendSynchronousUDPPacket", "IP: " + ip + " PORT:" + port + " DATA:" + payload);
 
         if (payload.contains(";")) {    // 多数据包命令不重复发送
             String[] split = payload.split(";");
             for (int i = 0; i < split.length; i++) {
+                System.out.println(split[i]);
                 buf = Utils.hexStringToByteArray(split[i]);
                 DatagramPacket packet;
                 InetAddress address = InetAddress.getByName(ip);
