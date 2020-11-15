@@ -65,8 +65,6 @@ public class Repository {
                         if (toDeviceBroadcast) {
                             String devBroadIp;
                             devBroadIp = d.ipAddr.replaceFirst("\\.\\d{1,3}$", ".255");
-//                            String[] split = d.ipAddr.split("^(.*)\\.\\d{1,3}$");
-//                            devBroadIp = split[0].concat(".255");
                             sendSynchronousUDPPacket(devBroadIp, port, payload);
                         }
                         if (toBroadcast)

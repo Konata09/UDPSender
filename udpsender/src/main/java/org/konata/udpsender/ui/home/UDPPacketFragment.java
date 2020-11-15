@@ -140,7 +140,12 @@ public class UDPPacketFragment extends Fragment {
                             targetDeviceList.add(holder.device);
                         }
                     }
-
+                    if (targetDeviceList.size() == 0) {
+                        Toast toast = Toast.makeText(getContext(), "You must choose at least one device", Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
+                        toast.show();
+                        return;
+                    }
                     model.getRepository().sendUDPPacket(targetDeviceList, port, payload, new RepositoryCallback() {
                         @Override
                         public void onComplete(Result result) {
