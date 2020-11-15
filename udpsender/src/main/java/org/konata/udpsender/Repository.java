@@ -62,14 +62,14 @@ public class Repository {
                     Device d = devices.get(finalI);
                     String payload = genWOLPayload(d.macAddr);
                     try {
-                        if (toDeviceBroadcast) {
+                        if (toDeviceBroadcast && !d.ipAddr.isEmpty()) {
                             String devBroadIp;
                             devBroadIp = d.ipAddr.replaceFirst("\\.\\d{1,3}$", ".255");
                             sendSynchronousUDPPacket(devBroadIp, port, payload);
                         }
                         if (toBroadcast)
                             sendSynchronousUDPPacket("255.255.255.255", port, payload);
-                        if (toDeviceAddr)
+                        if (toDeviceAddr && !d.ipAddr.isEmpty())
                             sendSynchronousUDPPacket(d.ipAddr, port, payload);
                         Log.d("sendWoLPacket", "SUCCESS: " + d.deviceName + " PORT:" + port + " DATA:" + payload);
                     } catch (Exception e) {
@@ -95,7 +95,6 @@ public class Repository {
         if (payload.contains(";")) {    // 多数据包命令不重复发送
             String[] split = payload.split(";");
             for (int i = 0; i < split.length; i++) {
-                System.out.println(split[i]);
                 buf = Utils.hexStringToByteArray(split[i]);
                 DatagramPacket packet;
                 InetAddress address = InetAddress.getByName(ip);
@@ -111,10 +110,8 @@ public class Repository {
                     packet = new DatagramPacket(buf, buf.length, address, port);
                     socket.send(packet);
                 } catch (IOException e) {
-//                System.out.println("err" + count + " " + ip);
                     exceptionsList.add(e);
                 } finally {
-//                System.out.println(count + " " + ip);
                     count++;
                 }
             }
