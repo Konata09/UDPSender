@@ -17,11 +17,11 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 
+import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.regex.Pattern;
 
 public class LoginActivity extends AppCompatActivity {
     private Button loginBtn;
@@ -31,6 +31,10 @@ public class LoginActivity extends AppCompatActivity {
     private EditText password;
     private String loginUsername;
     private String loginPassword;
+    private static final String serverURL = "http://172.31.16.50:9999/api/v1/";
+    private static final String loginUrl = serverURL.concat("login");
+
+    // TODO: SSL Support
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,34 +48,59 @@ public class LoginActivity extends AppCompatActivity {
 
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(final View v) {
                 loginUsername = username.getText().toString();
                 loginPassword = password.getText().toString();
                 boolean isUsernameValid = usernameInput.getError() == null;
                 boolean isPasswordValid = passwordInput.getError() == null;
 
+                if (loginUsername.isEmpty() || loginPassword.isEmpty() || !isUsernameValid || !isPasswordValid) {
+                    Snackbar.make(v, "Please check your input", Snackbar.LENGTH_LONG).show();
+                }
+
+                final JSONObject reqJson = new JSONObject();
+                try {
+                    reqJson.put("username", loginUsername);
+                    reqJson.put("password", loginPassword);
+                } catch (Exception e) {
+                    Toast.makeText(v.getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+                    return;
+                }
+
                 RequestQueue queue = Volley.newRequestQueue(LoginActivity.this);
-                final String url = "https://mccs.bronya.moe/api/v1/login";
-                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, null,
+                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, loginUrl, reqJson,
                         new Response.Listener<JSONObject>() {
+
                             @Override
                             public void onResponse(JSONObject response) {
-                                Toast.makeText(LoginActivity.this, response.toString(), Toast.LENGTH_LONG).show();
-                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                startActivity(intent);
-                                finish();
+                                try {
+                                    System.out.println(response.toString());
+                                    Integer retcode = response.getInt("retcode");
+                                    if (retcode == 0) {
+                                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                        startActivity(intent);
+                                        finish();
+                                    } else {
+                                        Snackbar.make(v, response.getString("message"), Snackbar.LENGTH_LONG).show();
+                                        loginBtn.setEnabled(true);
+                                    }
+                                } catch (JSONException e) {
+                                    Snackbar.make(v, e.getMessage(), Snackbar.LENGTH_LONG).show();
+                                    loginBtn.setEnabled(true);
+                                }
                             }
                         }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(LoginActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+                        Snackbar.make(v, error.toString(), Snackbar.LENGTH_LONG).show();
+                        error.printStackTrace();
                         loginBtn.setEnabled(true);
                     }
                 });
 
                 loginBtn.setEnabled(false);
                 queue.add(jsonObjectRequest);
-                Toast.makeText(LoginActivity.this, "addedQueue", Toast.LENGTH_LONG).show();
 
 
 //                if (isUsernameValid && isPasswordValid && !loginUsername.isEmpty() && !loginPassword.isEmpty()) {
@@ -110,12 +139,12 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                Pattern hexPattern = Pattern.compile("^\\S{3,}$");
-                if (!hexPattern.matcher(s.toString()).matches()) {
-                    usernameInput.setError("username must more than 3 characters");
-                } else {
-                    usernameInput.setError(null);
-                }
+//                Pattern hexPattern = Pattern.compile("^\\S{3,}$");
+//                if (!hexPattern.matcher(s.toString()).matches()) {
+//                    usernameInput.setError("username must more than 3 characters");
+//                } else {
+//                    usernameInput.setError(null);
+//                }
             }
         });
         password.addTextChangedListener(new TextWatcher() {
@@ -131,12 +160,12 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                Pattern hexPattern = Pattern.compile("^\\S{6,}$");
-                if (!hexPattern.matcher(s.toString()).matches()) {
-                    passwordInput.setError("password must more than 6 characters");
-                } else {
-                    passwordInput.setError(null);
-                }
+//                Pattern hexPattern = Pattern.compile("^\\S{3,}$");
+//                if (!hexPattern.matcher(s.toString()).matches()) {
+//                    passwordInput.setError("password must more than 6 characters");
+//                } else {
+//                    passwordInput.setError(null);
+//                }
             }
         });
     }
