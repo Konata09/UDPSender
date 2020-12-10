@@ -37,7 +37,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.5" />
+        app:layout_constraintGuide_percent="0.82" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/g2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.45" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/usernameinput"
@@ -47,9 +54,9 @@
         android:layout_marginStart="40dp"
         android:layout_marginEnd="40dp"
         android:paddingBottom="8dp"
-        app:layout_constraintBottom_toBottomOf="@id/g1"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/g2">
 
         <EditText
             android:id="@+id/username"
@@ -86,11 +93,10 @@
         android:id="@+id/loginBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
         android:text="Login"
+        app:layout_constraintBottom_toTopOf="@+id/g1"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/passinput" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/infoFooter"

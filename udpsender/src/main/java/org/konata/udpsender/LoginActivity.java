@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,6 +23,10 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.konata.udpsender.util.JwtUtils;
+
+import java.util.Date;
+import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
     private Button loginBtn;
@@ -71,16 +76,28 @@ public class LoginActivity extends AppCompatActivity {
                 RequestQueue queue = Volley.newRequestQueue(LoginActivity.this);
                 JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, loginUrl, reqJson,
                         new Response.Listener<JSONObject>() {
-
                             @Override
                             public void onResponse(JSONObject response) {
                                 try {
-                                    System.out.println(response.toString());
+                                    Log.d("loginJWT", response.toString());
                                     Integer retcode = response.getInt("retcode");
                                     if (retcode == 0) {
-                                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                        startActivity(intent);
-                                        finish();
+                                        String token = (String) ((JSONObject) response.get("data")).get("token");
+                                        Map jwtBody = JwtUtils.verifyJwt(token);
+                                        Date expDate = (Date) jwtBody.get("exp");
+                                        String username = (String) jwtBody.get("username");
+                                        Integer role = (Integer) jwtBody.get("role");
+                                        Date now = new Date();
+                                        if (now.before(expDate)) {
+                                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                            intent.putExtra("username", username);
+                                            intent.putExtra("role", role);
+                                            startActivity(intent);
+                                            finish();
+                                        } else {
+                                            Snackbar.make(v, response.getString("Server Error"), Snackbar.LENGTH_LONG).show();
+                                            loginBtn.setEnabled(true);
+                                        }
                                     } else {
                                         Snackbar.make(v, response.getString("message"), Snackbar.LENGTH_LONG).show();
                                         loginBtn.setEnabled(true);
