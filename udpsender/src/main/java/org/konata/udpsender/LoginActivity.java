@@ -1,6 +1,7 @@
 package org.konata.udpsender;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -44,12 +45,23 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        SharedPreferences sharedPref = getSharedPreferences("app", MODE_PRIVATE);
+        long tokenExpirationDate = sharedPref.getLong("tokenExpirationDate", 0);
+        Date dateNow = new Date();
+        if (tokenExpirationDate != 0 && dateNow.before(new Date(tokenExpirationDate))) {
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
         setContentView(R.layout.login_activity);
         loginBtn = findViewById(R.id.loginBtn);
         usernameInput = findViewById(R.id.usernameinput);
         passwordInput = findViewById(R.id.passinput);
         username = findViewById(R.id.username);
         password = findViewById(R.id.pass);
+
 
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,9 +101,14 @@ public class LoginActivity extends AppCompatActivity {
                                         Integer role = (Integer) jwtBody.get("role");
                                         Date now = new Date();
                                         if (now.before(expDate)) {
+                                            // 保存用户名、用户组、token
+                                            SharedPreferences sharedPreferences = getSharedPreferences("app", MODE_PRIVATE);
+                                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                                            editor.putString("username", username);
+                                            editor.putInt("role", role);
+                                            editor.putLong("tokenExpirationDate", expDate.getTime());
+                                            editor.commit();
                                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                            intent.putExtra("username", username);
-                                            intent.putExtra("role", role);
                                             startActivity(intent);
                                             finish();
                                         } else {
@@ -115,31 +132,8 @@ public class LoginActivity extends AppCompatActivity {
                         loginBtn.setEnabled(true);
                     }
                 });
-
                 loginBtn.setEnabled(false);
                 queue.add(jsonObjectRequest);
-
-
-//                if (isUsernameValid && isPasswordValid && !loginUsername.isEmpty() && !loginPassword.isEmpty()) {
-//                    if (testUser.getUsername().equals(loginUsername) && testUser.getPassword().equals(loginPassword)) {
-//                        SharedPreferences sharedPreferences = getSharedPreferences("logged",MODE_PRIVATE);
-//                        SharedPreferences.Editor editor = sharedPreferences.edit();
-//                        editor.putString("loggedUsername",testUser.getUsername());
-//                        editor.commit();
-//                        Intent intent = new Intent(MainActivity.this,UserHomeActivity.class);
-//                        startActivity(intent);
-//
-//                    } else {
-//                        final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-//                        builder.setTitle("Login Failed");
-//                        builder.setMessage("Please check your input");
-//                        final AlertDialog dialog = builder.create();
-//                        dialog.show();
-//                    }
-//                } else {
-//                    Snackbar.make(v, "Please check your input", Snackbar.LENGTH_LONG).show();
-//                }
-
             }
         });
 

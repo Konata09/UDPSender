@@ -1,5 +1,6 @@
 package org.konata.udpsender;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,6 +13,8 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
 
+import java.util.Date;
+
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
@@ -22,6 +25,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SharedPreferences sharedPref = getSharedPreferences("app", MODE_PRIVATE);
+        long tokenExpirationDate = sharedPref.getLong("tokenExpirationDate", 0);
+        int role = sharedPref.getInt("role", 1); // 0:admin 1:user
+        String username = sharedPref.getString("username", "demo");
+        Date dateNow = new Date();
+//        if (tokenExpirationDate == 0 || !dateNow.before(new Date(tokenExpirationDate))) {
+//            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+//            startActivity(intent);
+//            finish();
+//        }
+
         setContentView(R.layout.activity_main);
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
