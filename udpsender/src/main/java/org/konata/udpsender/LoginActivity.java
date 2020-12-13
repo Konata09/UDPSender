@@ -107,7 +107,7 @@ public class LoginActivity extends AppCompatActivity {
                                             editor.putString("username", username);
                                             editor.putInt("role", role);
                                             editor.putLong("tokenExpirationDate", expDate.getTime());
-                                            editor.commit();
+                                            editor.apply();
                                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                                             startActivity(intent);
                                             finish();
