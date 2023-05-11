@@ -78,7 +78,7 @@
                         android:layout_marginStart="36dp"
                         android:layout_marginEnd="32dp"
                         android:inputType="textMultiLine"
-                        android:hint="012BFFFF"
+                        android:hint="Hex Value"
                         android:textSize="16sp" />
                 </RadioGroup>
             </androidx.cardview.widget.CardView>
